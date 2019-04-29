@@ -18,6 +18,7 @@
 #include <nlohmann/json.hpp>
 
 #include "internal/URI.h"
+#include "expected.hpp"
 
 using tcp = boost::asio::ip::tcp; // from <boost/asio.hpp>
 namespace http = boost::beast::http; // from <beast/http.hpp>
@@ -27,28 +28,28 @@ namespace consulcpp { namespace internal {
 class HttpClient
 {
 public:
-	static std::optional<nlohmann::json> get( const std::string & address )
+	static tl::expected<nlohmann::json,int> get( const std::string & address )
 	{
 		return executeJson( address, {}, http::verb::get );
 	}
 
-	static std::optional<nlohmann::json> post( const std::string & address, const nlohmann::json & json )
+	static tl::expected<nlohmann::json,int> post( const std::string & address, const nlohmann::json & json )
 	{
 		return executeJson( address, json, http::verb::post );
 	}
 
-	static std::optional<nlohmann::json> put( const std::string & address, const nlohmann::json & json )
+	static tl::expected<nlohmann::json,int> put( const std::string & address, const nlohmann::json & json )
 	{
 		return executeJson( address, json, http::verb::put );
 	}
 
-	static std::string putAsString( const std::string & address, const nlohmann::json & json )
+	static tl::expected<std::string,int> putAsString( const std::string & address, const nlohmann::json & json )
 	{
 		return executeString( address, json, http::verb::put );
 	}
 
 private:
-	static std::optional<nlohmann::json> executeJson( const std::string & address, const nlohmann::json & json, http::verb verb )
+	static tl::expected<nlohmann::json,int> executeJson( const std::string & address, const nlohmann::json & json, http::verb verb )
 	{
 		const auto response = execute( address, json.empty() ? "" : json.dump(), verb );
 
@@ -57,11 +58,13 @@ private:
 				return nlohmann::json::parse( std::get<0>( response ) );
 			}catch(...){
 				// TODO report parsing error
+				return static_cast<int>( 600 );
 			}
 		}else{
 			spdlog::error( "execute<json> error {}", static_cast<int>( std::get<1>( response )));
+			return tl::unexpected( static_cast<int>( std::get<1>( response )) );
 		}
-		return {};
+		return static_cast<int>( 600 );
 	}
 
 	static std::string executeString( const std::string & address, const nlohmann::json & json, http::verb verb )
