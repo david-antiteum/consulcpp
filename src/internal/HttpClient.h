@@ -59,7 +59,7 @@ private:
 				// TODO report parsing error
 			}
 		}else{
-			// TODO report empty 
+			spdlog::error( "execute<json> error {}", static_cast<int>( std::get<1>( response )));
 		}
 		return {};
 	}
@@ -71,7 +71,7 @@ private:
 		if( std::get<1>( response ) == http::status::ok ){
 			return std::get<0>( response );
 		}else{
-			// TODO report empty 
+			spdlog::error( "execute<string> error {}", static_cast<int>( std::get<1>( response )));
 		}
 		return {};
 	}
@@ -97,7 +97,13 @@ private:
 			}else{
 				http::request<http::string_body> req;
 				req.method( verb );
-				req.target( uri.path() );
+
+				auto query = uri.query();
+				if( query.empty() ){
+					req.target( uri.path() );
+				}else{
+					req.target( uri.path() + "?" + query );
+				}
 				req.set( http::field::host, uri.host() + ":" + std::to_string( uri.port() ) );
 				req.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
 				if( !value.empty() ){
