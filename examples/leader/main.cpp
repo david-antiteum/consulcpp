@@ -36,7 +36,7 @@ class HealthServiceImpl final : public grpc::health::v1::Health::Service
 	}
 };
 
-static std::unique_ptr<grpc::Server> server;
+static std::unique_ptr<grpc::Server> gServer;
 
 void RunServer( const consulcpp::Service & service )
 {
@@ -49,10 +49,14 @@ void RunServer( const consulcpp::Service & service )
 	builder.RegisterService( &leaderService );
 	builder.RegisterService( &healthService );
 
-	server = builder.BuildAndStart();
-	spdlog::info( "Server listening on {}", serverAddress );
-	server->Wait();
-	spdlog::info( "Server stopped" );
+	gServer = builder.BuildAndStart();
+	if( gServer ){
+		spdlog::info( "Server listening on {}", serverAddress );
+		gServer->Wait();
+		spdlog::info( "Server stopped" );
+	}else{
+		spdlog::critical( "Cannot start gRPC server on {}", serverAddress );
+	}
 }
 
 int main( int argc, char * argv[] )
@@ -88,7 +92,9 @@ int main( int argc, char * argv[] )
 		}
 		std::thread grpcThread( RunServer, service );
 		loop();
-		server->Shutdown();	
+		if( gServer ){
+			gServer->Shutdown();
+		}
 		grpcThread.join();
 		consul.leader().release( service, session );
 		consul.sessions().destroy( session );
