@@ -15,7 +15,15 @@ link_libraries( uriparser::uriparser )
 link_libraries( nlohmann_json::nlohmann_json )
 link_libraries( fmt::fmt )
 
-add_library( ${PROJECT_NAME} SHARED 
+if( BUILD_SHARED_LIBS )
+	add_compile_definitions( ConsulCPP_DLL )
+	add_compile_definitions( ConsulCPP_EXPORTS )
+	set( LIB_TYPE SHARED )
+else()
+	set( LIB_TYPE STATIC )
+endif()
+
+add_library( ${PROJECT_NAME} ${LIB_TYPE} 
 	Consul.cpp
 	Services.cpp
 	Service.cpp
@@ -32,10 +40,6 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION 0
 )
-if( BUILD_SHARED_LIBS )
-	add_compile_definitions( ConsulCPP_DLL )
-	add_compile_definitions( ConsulCPP_EXPORTS )
-endif()
 add_compile_definitions( _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING )
 
 if( WIN32 )
