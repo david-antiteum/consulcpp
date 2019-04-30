@@ -3,7 +3,7 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 	set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 endif()
 
-project( ConsulCPP VERSION 0.0.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
+project( consulcpp VERSION 0.0.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
 
 find_package( uriparser CONFIG REQUIRED )
 find_package( nlohmann_json CONFIG REQUIRED )
@@ -32,8 +32,10 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION 0
 )
-add_compile_definitions( ConsulCPP_DLL )
-add_compile_definitions( ConsulCPP_EXPORTS )
+if( BUILD_SHARED_LIBS )
+	add_compile_definitions( ConsulCPP_DLL )
+	add_compile_definitions( ConsulCPP_EXPORTS )
+endif()
 add_compile_definitions( _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING )
 
 if( WIN32 )

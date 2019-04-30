@@ -6,7 +6,7 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 	message( "Using vcpkg settings" )
 endif()
 
-project( ConsulCPP VERSION 0.0.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
+project( consulcpp VERSION 0.0.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
 
 if( NOT DEFINED USING_VCPKG AND EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 	message( "Using conan settings" )

@@ -93,7 +93,7 @@ set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )
 include_directories( . ../../include )
 
 target_link_libraries( ${PROJECT_NAME} 
-	ConsulCPP
+	consulcpp
 	protobuf::libprotobuf
 	gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc_cronet
 )
