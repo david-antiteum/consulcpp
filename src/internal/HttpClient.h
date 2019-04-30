@@ -17,7 +17,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "internal/URI.h"
+#include "internal/Uri.h"
 #include "expected.hpp"
 
 using tcp = boost::asio::ip::tcp; // from <boost/asio.hpp>

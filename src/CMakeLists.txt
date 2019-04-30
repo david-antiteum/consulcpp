@@ -35,7 +35,10 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 add_compile_definitions( ConsulCPP_DLL )
 add_compile_definitions( ConsulCPP_EXPORTS )
 add_compile_definitions( _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING )
-add_compile_definitions( _WIN32_WINNT=0x0A00 )
+
+if( WIN32 )
+	add_compile_definitions( _WIN32_WINNT=0x0A00 )
+endif()
 
 include_directories( . ../include )
 
