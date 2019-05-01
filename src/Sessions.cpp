@@ -35,10 +35,19 @@ consulcpp::Session consulcpp::Sessions::create() const
 	return res;
 }
 
-void consulcpp::Sessions::destroy( const consulcpp::Session & session )
+bool consulcpp::Sessions::destroy( const consulcpp::Session & session ) const
 {
 	consulcpp::internal::HttpClient		restClient;
+	bool								res = false;
 
-	auto jsonMaybe = restClient.put( fmt::format( "{}/{}/session/destroy/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), session.mId ), {} );
+	auto response = restClient.putAsString( fmt::format( "{}/{}/session/destroy/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), session.mId ) );
+	if( response ){
+		if( response.value().find( "true" ) != std::string::npos ){
+			res = true;
+		}
+	}else{
+		spdlog::error( "KV delete: Consul returns the error {}", response.error() );
+	}
+	return res;
 
 }

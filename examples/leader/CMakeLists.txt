@@ -70,7 +70,7 @@ function(PROTOBUF_GENERATE_GRPC_CPP SRCS HDRS)
   set(${HDRS} ${${HDRS}} PARENT_SCOPE)
 endfunction()
 
-file( GLOB ProtoFiles leader.proto health.proto )
+file( GLOB ProtoFiles health.proto )
 protobuf_generate_cpp(ProtoSources ProtoHeaders ${ProtoFiles})
 PROTOBUF_GENERATE_GRPC_CPP(ProtoGRPCSources ProtoGRPCHeaders ${ProtoFiles})
 
@@ -85,7 +85,9 @@ set_target_properties( ${PROJECT_NAME}
 	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" 
 )
 
-add_compile_definitions( ConsulCPP_DLL )
+if( BUILD_SHARED_LIBS )
+	add_compile_definitions( ConsulCPP_DLL )
+endif()
 add_compile_definitions( _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING )
 
 set_property( TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17 )

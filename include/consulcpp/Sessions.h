@@ -14,14 +14,21 @@ struct Session
 	std::string		mId;
 };
 
+/*! Implements Session Endpoints https://www.consul.io/api/session.html
+*/
 class ConsulCPP_API Sessions
 {
 public:
 	Sessions( Consul & consul );
 	~Sessions();
 
+	/*! Create a new session
+	*/
 	Session create() const;
-	void destroy( const Session & session );
+	/*! Delete the session.
+		Return true on success.
+	*/
+	bool destroy( const Session & session ) const;
 
 private:
 	struct Private;

@@ -1,0 +1,8 @@
+#pragma once
+
+#include <consulcpp/Consul.h>
+#include <consulcpp/Service.h>
+#include <consulcpp/Services.h>
+#include <consulcpp/Sessions.h>
+#include <consulcpp/Leader.h>
+#include <consulcpp/KV.h>

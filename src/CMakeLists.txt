@@ -29,6 +29,7 @@ add_library( ${PROJECT_NAME} ${LIB_TYPE}
 	Service.cpp
 	Sessions.cpp
 	Leader.cpp
+	KV.cpp
 )
 set_target_properties( ${PROJECT_NAME}
 	PROPERTIES

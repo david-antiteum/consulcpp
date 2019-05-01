@@ -1,11 +1,7 @@
 
-#include <consulcpp/Consul.h>
-#include <consulcpp/Service.h>
-#include <consulcpp/Services.h>
-#include <consulcpp/Sessions.h>
-#include <consulcpp/Leader.h>
+#include <consulcpp/ConsulCpp>
 
-#include <fmt/printf.h>
+#include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
 #include <csignal>
@@ -15,16 +11,7 @@
 #include "../common/helpers.h"
 
 #include <grpc++/grpc++.h>
-#include "leader.grpc.pb.h"
 #include "health.grpc.pb.h"
-
-class LeaderServiceImpl final : public ConsulCPP::Leader::Service
-{
-	grpc::Status query( grpc::ServerContext* context, const google::protobuf::Empty* request, ConsulCPP::LeaderStatus * reply ) override
-	{
-		return grpc::Status::OK;
-	}
-};
 
 class HealthServiceImpl final : public grpc::health::v1::Health::Service
 {
@@ -41,12 +28,10 @@ static std::unique_ptr<grpc::Server> gServer;
 void RunServer( const consulcpp::Service & service )
 {
 	std::string 		serverAddress = fmt::format( "{}:{}", service.mAddress, service.mPort );
-	LeaderServiceImpl 	leaderService;
 	HealthServiceImpl 	healthService;
 	grpc::ServerBuilder builder;
 
 	builder.AddListeningPort( serverAddress, grpc::InsecureServerCredentials() );
-	builder.RegisterService( &leaderService );
 	builder.RegisterService( &healthService );
 
 	gServer = builder.BuildAndStart();
@@ -75,14 +60,21 @@ int main( int argc, char * argv[] )
 		service.mPort = 50051;
 
 		check.mInterval = "5s";
-//		check.mHTTP = fmt::format( "http://{}:{}/health", service.mAddress, service.mPort );
+		check.mDeregisterCriticalServiceAfter = "1m";
 		check.mGRPC = fmt::format( "{}:{}/Health", service.mAddress, service.mPort );
 		service.mChecks = { check };
 
-		consul.services().publish( service );
+		// Purge death services
+		std::vector<consulcpp::Service>	otherServices = consul.services().findInCatalog( service.mName, service.mTags );
+		for( auto service: otherServices ){
+			consul.services().destroy( service );
+		}
 
+		consul.services().create( service );
 		consulcpp::Session 	session = consul.sessions().create();
 		spdlog::info( "Session {}", session.mId );
+
+		consul.kv().set( "my-key", "my-value" );
 
 		consulcpp::Leader::Status leader = consul.leader().acquire( service, session );
 		if( leader == consulcpp::Leader::Status::Yes ){
@@ -96,9 +88,19 @@ int main( int argc, char * argv[] )
 			gServer->Shutdown();
 		}
 		grpcThread.join();
+		
+		auto val = consul.kv().get( "my-key" );
+		if( val ){
+			spdlog::info( "Key value was {}", val.value() );
+			if( consul.kv().destroy( "my-key" ) ){
+				spdlog::info( "Key deleted" );
+			}
+		}else{
+			spdlog::info( "Key not found" );
+		}
 		consul.leader().release( service, session );
 		consul.sessions().destroy( session );
-		consul.services().unpublish( service );
+		consul.services().destroy( service );
 		spdlog::info( "Bye" );
 	}
 	return 0;

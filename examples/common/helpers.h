@@ -1,5 +1,9 @@
 #pragma once
 
+#include <csignal>
+#include <chrono>
+#include <thread>
+
 static std::sig_atomic_t gSignalStatus;
 
 static void signalHandler( int signal )

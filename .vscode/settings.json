@@ -1,6 +1,8 @@
 {
 	"cSpell.words": [
-		"consulcpp"
+		"GRPC",
+		"consulcpp",
+		"nlohmann"
 	],
 	"C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
 	"editor.insertSpaces": false,

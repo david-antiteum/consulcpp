@@ -43,9 +43,19 @@ public:
 		return executeJson( address, json, http::verb::put );
 	}
 
+	static tl::expected<std::string,int> putAsString( const std::string & address, const std::string & value = "" )
+	{
+		return executeString( address, value, http::verb::put );
+	}
+
 	static tl::expected<std::string,int> putAsString( const std::string & address, const nlohmann::json & json )
 	{
 		return executeString( address, json, http::verb::put );
+	}
+
+	static tl::expected<std::string,int> deleteAsString( const std::string & address, const std::string & value = "" )
+	{
+		return executeString( address, value, http::verb::delete_ );
 	}
 
 private:
@@ -78,6 +88,19 @@ private:
 		}
 		return {};
 	}
+
+	static std::string executeString( const std::string & address, const std::string & value, http::verb verb )
+	{
+		const auto response = execute( address, value, verb );
+
+		if( std::get<1>( response ) == http::status::ok ){
+			return std::get<0>( response );
+		}else{
+			spdlog::error( "execute<string> error {}", static_cast<int>( std::get<1>( response )));
+		}
+		return {};
+	}
+
 
 	static std::tuple<std::string,http::status> execute( const std::string & address, const std::string & value, http::verb verb )
 	{

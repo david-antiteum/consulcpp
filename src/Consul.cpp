@@ -5,22 +5,25 @@
 #include "consulcpp/Services.h"
 #include "consulcpp/Sessions.h"
 #include "consulcpp/Leader.h"
+#include "consulcpp/KV.h"
 
 #include "internal/HttpClient.h"
 
 struct consulcpp::Consul::Private
 {
-	std::string 			mAgentAddress;
-	std::string 			mAgentAPIVersion = "v1";
-	std::string				mAddress;
-	consulcpp::Services		mServices;
-	consulcpp::Sessions		mSessions;
-	consulcpp::Leader		mLeader;
+	std::string 	mAgentAddress;
+	std::string 	mAgentAPIVersion = "v1";
+	std::string		mAddress;
+	Services		mServices;
+	Sessions		mSessions;
+	Leader			mLeader;
+	KV				mKV;
 
 	Private( Consul & consul, const std::string & agentAddress )
 		: mServices( consul )
 		, mSessions( consul )
 		, mLeader( consul )
+		, mKV( consul )
 	{
 		if( agentAddress.empty() ){
 			mAgentAddress = "http://127.0.0.1:8500";
@@ -89,4 +92,9 @@ consulcpp::Sessions & consulcpp::Consul::sessions() const
 consulcpp::Leader & consulcpp::Consul::leader() const
 {
 	return d->mLeader;
+}
+
+consulcpp::KV & consulcpp::Consul::kv() const
+{
+	return d->mKV;
 }
