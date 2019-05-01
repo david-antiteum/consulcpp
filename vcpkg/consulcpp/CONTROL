@@ -1,4 +1,4 @@
 Source: consulcpp
-Version: 0.0.1-2
+Version: 0.1.0-1
 Description: A C++ library that implements the Consul API
 Build-Depends: uriparser, nlohmann-json, boost, fmt, spdlog

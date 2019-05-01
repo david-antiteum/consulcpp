@@ -3,8 +3,8 @@ include(vcpkg_common_functions)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO david-antiteum/consulcpp
-    REF 0.0.1-2
-    SHA512 c4cbb1957e441041ff8393a9d1ecb2bd23c14afcbb3bbd22d6336d028e1ea5384ded287879371a1756e785b15b180490745142852a645782ff600b204faf8fcb
+    REF 0.1.0-1
+    SHA512 024aa88ece7e3e61024d0a51fb9cb1abed5f33e1abde11a2b53c5d3437206c8a2da5db525a473a9a35b90cfa83a078e2f092f419c27b4d1019cdb7d08dd27c00
 )
 
 vcpkg_configure_cmake(
