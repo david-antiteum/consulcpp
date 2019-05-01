@@ -47,11 +47,11 @@ extern ConsulCPP_API void from_json( const nlohmann::json & j, ServiceCheck & s 
 
 	Fields in this struct are used in three different scenarios:
 	- to register the service
-	- as a find in the local agent (endpoint: /catalog/service/:service)
-	- as a find in the catalog (endpoint: /agent/service/:service)
+	- after finding it in the local agent (endpoint: /catalog/service/:service)
+	- after finding it in find in the catalog (endpoint: /agent/service/:service)
 
-	The JSON returned by the catalog differs, at key names, from the one in the agent. We will
-	return an unified version. For example, mName correspont to:
+	The JSON returned differs en each scenario. We will return an unified version.
+	For example, mName correspont to:
 	- Name: when registering the service
 	- Service: when reading from the local agent
 	- ServiceName: when reading from the catalog
@@ -59,7 +59,6 @@ extern ConsulCPP_API void from_json( const nlohmann::json & j, ServiceCheck & s 
 struct ConsulCPP_API Service
 {
 	std::string		mId;
-	// Name (PUT) or Service (GET) tag
 	std::string		mName;
 	std::string		mAddress;
 	int				mPort = 0;

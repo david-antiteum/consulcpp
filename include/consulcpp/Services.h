@@ -20,17 +20,17 @@ public:
 	Services( Consul & consul );
 	~Services();
 
-	/*! Register a new service.
+	/*! Registers a new service.
 	*/
 	void create( const Service & service );
-	/*! Deregister a service.
+	/*! Deregisters a service.
 	*/
 	void destroy( const Service & id );
 
-	/*! Look for a service in the local agent
+	/*! Looks for a service in the local agent
 	*/
 	std::optional<Service> findInLocal( const std::string & id ) const;
-	/*! Look for a service in the catalog
+	/*! Looks for a service in the catalog
 	*/
 	std::vector<Service> findInCatalog( const std::string & name, const std::vector<std::string> & tags ) const;
 

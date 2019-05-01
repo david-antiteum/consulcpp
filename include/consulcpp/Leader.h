@@ -30,10 +30,10 @@ public:
 		Error
 	};
 
-	/*! Try to be the leader (using a service name and session id).
+	/*! Tries to be the leader (using a service name and session id).
 	*/
 	Status acquire( const Service & service, const Session & session ) const;
-	/*! Step down as the leader (using a service name and session id).
+	/*! Steps down as the leader (using a service name and session id).
 	*/
 	void release( const Service & service, const Session & session ) const;
 

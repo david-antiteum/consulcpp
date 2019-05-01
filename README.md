@@ -7,7 +7,7 @@ A this moment only some endpoints and actions are supported:
 - Register and deregister services with HTTP or gPRC health checks
 - Set, get and delete key/values
 - Create and delete sessions
-- Ledaer election using sessions
+- Leader election using sessions
 
 Example:
 

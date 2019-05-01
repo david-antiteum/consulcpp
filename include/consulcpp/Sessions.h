@@ -22,11 +22,11 @@ public:
 	Sessions( Consul & consul );
 	~Sessions();
 
-	/*! Create a new session
+	/*! Creates a new session
 	*/
 	Session create() const;
-	/*! Delete the session.
-		Return true on success.
+	/*! Deletes the session.
+		Returns true on success.
 	*/
 	bool destroy( const Session & session ) const;
 

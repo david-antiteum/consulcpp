@@ -17,15 +17,15 @@ public:
 	KV( Consul & consul );
 	~KV();
 
-	/*! Return the value of a single key
+	/*! Returns the value of a single key
 	*/
 	std::optional<std::string> get( const std::string & key ) const;
-	/*! Set the value of a key, creating it if required
+	/*! Sets the value of a key, creates it if required
 		Return true on success.
 	*/
 	bool set( const std::string & key, const std::string & value ) const;
-	/*! Delete the key/value.
-		Return true on success.
+	/*! Deletes the key/value.
+		Returns true on success.
 	*/
 	bool destroy( const std::string & key ) const;
 
