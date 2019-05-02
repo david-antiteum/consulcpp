@@ -35,7 +35,7 @@ void consulcpp::Services::destroy( const Service & service )
 {
 	consulcpp::internal::HttpClient		restClient;
 
-	auto jsonMaybe = restClient.put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mId ), {} );
+	auto jsonMaybe = restClient.put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.id() ), {} );
 }
 
 std::optional<consulcpp::Service> consulcpp::Services::findInLocal( const std::string & id ) const

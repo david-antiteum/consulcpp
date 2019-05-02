@@ -58,6 +58,16 @@ extern ConsulCPP_API void from_json( const nlohmann::json & j, ServiceCheck & s 
 */
 struct ConsulCPP_API Service
 {
+	// In Consul an empty id is valid and the name is used instead
+	const std::string & id() const
+	{
+		if( !mId.empty() ){
+			return mId;
+		}else{
+			return mName;
+		}
+	}
+
 	std::string		mId;
 	std::string		mName;
 	std::string		mAddress;
