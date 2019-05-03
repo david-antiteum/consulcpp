@@ -25,9 +25,9 @@ consulcpp::KV::~KV()
 {
 }
 
-std::optional<std::string> consulcpp::KV::get( const std::string & key ) const
+stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 {
-	std::optional<std::string>			res;
+	stdx::optional<std::string>			res;
 	consulcpp::internal::HttpClient		restClient;
 
 	auto jsonMaybe = restClient.get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );

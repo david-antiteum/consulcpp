@@ -8,7 +8,6 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
-#include <optional>
 #include <tuple>
 
 #include <cstdlib>
@@ -17,7 +16,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "internal/Uri.h"
+#include "Uri.h"
 #include "expected.hpp"
 
 using tcp = boost::asio::ip::tcp; // from <boost/asio.hpp>
@@ -72,7 +71,7 @@ private:
 			}
 		}else{
 			spdlog::error( "execute<json> error {}", static_cast<int>( std::get<1>( response )));
-			return tl::unexpected( static_cast<int>( std::get<1>( response )) );
+			return tl::make_unexpected( static_cast<int>( std::get<1>( response )) );
 		}
 		return static_cast<int>( 600 );
 	}
@@ -149,7 +148,7 @@ private:
 					if( ec ){
 						spdlog::error( "Error reading from {}. {}", address, ec.message() );
 					}else{
-						res = { response.body(), response.result() };
+						res = std::make_tuple( response.body(), response.result() );
 					}
 				}
 				sock.shutdown(tcp::socket::shutdown_both, ec);

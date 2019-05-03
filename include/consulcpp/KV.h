@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <optional>
 #include <memory>
 
 #include "consulcpp/Export.h"
@@ -20,7 +19,7 @@ public:
 
 	/*! Returns the value of a single key
 	*/
-	std::optional<std::string> get( const std::string & key ) const;
+	stdx::optional<std::string> get( const std::string & key ) const;
 	/*! Sets the value of a key, creates it if required
 		Return true on success.
 	*/

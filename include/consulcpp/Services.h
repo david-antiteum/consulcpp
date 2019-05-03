@@ -2,7 +2,6 @@
 
 #include <string>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include "consulcpp/Export.h"
@@ -29,7 +28,7 @@ public:
 
 	/*! Looks for a service in the local agent
 	*/
-	std::optional<Service> findInLocal( const std::string & id ) const;
+	stdx::optional<Service> findInLocal( const std::string & id ) const;
 	/*! Looks for a service in the catalog
 	*/
 	std::vector<Service> findInCatalog( const std::string & name, const std::vector<std::string> & tags ) const;
