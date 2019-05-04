@@ -51,9 +51,9 @@ bool consulcpp::Consul::connect()
 {
 	consulcpp::internal::HttpClient		restClient;
 
-	auto jsonMaybe = restClient.get( fmt::format( "{}/{}/agent/self", d->mAgentAddress, d->mAgentAPIVersion ) );
-	if( jsonMaybe ){
-		auto jsonValue = jsonMaybe.value();
+	auto response = restClient.get( fmt::format( "{}/{}/agent/self", d->mAgentAddress, d->mAgentAPIVersion ) );
+	if( response ){
+		auto jsonValue = nlohmann::json::parse( response.value() );
 		try{
 			auto memberJson = jsonValue.at( "Member" );
 			d->mAddress = memberJson.at( "Addr" ).get<std::string>();

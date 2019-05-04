@@ -28,14 +28,14 @@ void consulcpp::Services::create( const Service & service )
 {
 	consulcpp::internal::HttpClient		restClient;
 
-	auto jsonMaybe = restClient.put( fmt::format( "{}/{}/agent/service/register", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ), service );
+	restClient.put( fmt::format( "{}/{}/agent/service/register", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ), service );
 }
 
 void consulcpp::Services::destroy( const Service & service )
 {
 	consulcpp::internal::HttpClient		restClient;
 
-	auto jsonMaybe = restClient.put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.id() ), {} );
+	restClient.put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.id() ) );
 }
 
 stdx::optional<consulcpp::Service> consulcpp::Services::findInLocal( const std::string & id ) const
@@ -70,9 +70,10 @@ std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( const std::s
 	if( !query.empty() ){
 		path += "?" + query;
 	}
-	auto jsonMaybe = restClient.get( path );
-	if( jsonMaybe && jsonMaybe.value().is_array() ){
-		for( auto val: jsonMaybe.value() ){
+	auto response = restClient.get( path );
+	if( response ){
+		auto jsonValue = nlohmann::json::parse( response.value() );
+		for( auto val: jsonValue ){
 			res.push_back( val.get<consulcpp::Service>() );
 		}
 	}

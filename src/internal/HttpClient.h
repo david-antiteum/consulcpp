@@ -22,103 +22,73 @@
 using tcp = boost::asio::ip::tcp; // from <boost/asio.hpp>
 namespace http = boost::beast::http; // from <beast/http.hpp>
 
+namespace fmt {
+	template <>
+	struct formatter<http::status> {
+		template <typename ParseContext>
+		constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
+
+		template <typename FormatContext>
+		auto format(const http::status & s, FormatContext &ctx) {
+			return format_to(ctx.out(), "{}", static_cast<int>( s ) );
+		}
+	};
+}
+
 namespace consulcpp { namespace internal {
 
 class HttpClient
 {
 public:
-	static tl::expected<nlohmann::json,int> get( const std::string & address )
+	static tl::expected<std::string,http::status> get( const std::string & address )
 	{
-		return executeJson( address, {}, http::verb::get );
+		return execute( address, {}, http::verb::get );
 	}
 
-	static tl::expected<nlohmann::json,int> post( const std::string & address, const nlohmann::json & json )
+	static tl::expected<std::string,http::status> post( const std::string & address, const std::string & value )
 	{
-		return executeJson( address, json, http::verb::post );
+		return execute( address, value, http::verb::post );
 	}
 
-	static tl::expected<nlohmann::json,int> put( const std::string & address, const nlohmann::json & json )
+	static tl::expected<std::string,http::status> post( const std::string & address, const nlohmann::json & value )
 	{
-		return executeJson( address, json, http::verb::put );
+		return execute( address, value.dump(), http::verb::post );
 	}
 
-	static tl::expected<std::string,int> putAsString( const std::string & address, const std::string & value = "" )
+	static tl::expected<std::string,http::status> put( const std::string & address, const std::string & value = "" )
 	{
-		return executeString( address, value, http::verb::put );
+		return execute( address, value, http::verb::put );
 	}
 
-	static tl::expected<std::string,int> putAsString( const std::string & address, const nlohmann::json & json )
+	static tl::expected<std::string,http::status> put( const std::string & address, const nlohmann::json & value )
 	{
-		return executeString( address, json, http::verb::put );
+		return execute( address, value.dump(), http::verb::put );
 	}
 
-	static tl::expected<std::string,int> deleteAsString( const std::string & address, const std::string & value = "" )
+	static tl::expected<std::string,http::status> delete_( const std::string & address )
 	{
-		return executeString( address, value, http::verb::delete_ );
+		return execute( address, {}, http::verb::delete_ );
 	}
 
 private:
-	static tl::expected<nlohmann::json,int> executeJson( const std::string & address, const nlohmann::json & json, http::verb verb )
+	static tl::expected<std::string,http::status> execute( const std::string & address, const std::string & value, http::verb verb )
 	{
-		const auto response = execute( address, json.empty() ? "" : json.dump(), verb );
-
-		if( std::get<1>( response ) == http::status::ok ){
-			try{
-				return nlohmann::json::parse( std::get<0>( response ) );
-			}catch(...){
-				// TODO report parsing error
-				return static_cast<int>( 600 );
-			}
-		}else{
-			spdlog::error( "execute<json> error {}", static_cast<int>( std::get<1>( response )));
-			return tl::make_unexpected( static_cast<int>( std::get<1>( response )) );
-		}
-		return static_cast<int>( 600 );
-	}
-
-	static std::string executeString( const std::string & address, const nlohmann::json & json, http::verb verb )
-	{
-		const auto response = execute( address, json.empty() ? "" : json.dump(), verb );
-
-		if( std::get<1>( response ) == http::status::ok ){
-			return std::get<0>( response );
-		}else{
-			spdlog::error( "execute<string> error {}", static_cast<int>( std::get<1>( response )));
-		}
-		return {};
-	}
-
-	static std::string executeString( const std::string & address, const std::string & value, http::verb verb )
-	{
-		const auto response = execute( address, value, verb );
-
-		if( std::get<1>( response ) == http::status::ok ){
-			return std::get<0>( response );
-		}else{
-			spdlog::error( "execute<string> error {}", static_cast<int>( std::get<1>( response )));
-		}
-		return {};
-	}
-
-
-	static std::tuple<std::string,http::status> execute( const std::string & address, const std::string & value, http::verb verb )
-	{
-		std::tuple<std::string,http::status>	res{ "", http::status::internal_server_error };
+		tl::expected<std::string,http::status>	res;
 		Uri 									uri( address );
-		boost::beast::error_code 				ec;
 
 		if( !uri.isValid() ){
 			spdlog::error( "cannot parse uri {}", address );
-			std::get<1>(res) = http::status::bad_request;
+			res = tl::make_unexpected( http::status::bad_request );
 		}else{
-			boost::asio::io_service ios;
-			tcp::socket sock{ ios };
+			boost::asio::io_service 		ios;
+			tcp::socket 					sock{ ios };
+			boost::beast::error_code 		ec;
 
 			tcp::endpoint endpoint( boost::asio::ip::address::from_string( uri.host() ), uri.port() );
 			sock.connect( endpoint, ec );
 			if( ec ){
 				spdlog::error( "Error conecting to {}. {}", address, ec.message() );
-				std::get<1>(res) = http::status::service_unavailable;
+				res = tl::make_unexpected( http::status::service_unavailable );
 			}else{
 				http::request<http::string_body> req;
 				req.method( verb );
@@ -136,19 +106,22 @@ private:
 				}
 				req.prepare_payload();
 
+				boost::beast::error_code 	ec;
 				http::write( sock, req, ec );
 				if( ec ){
 					spdlog::error( "Error sending request to {}. {}", address, ec.message() );
-					std::get<1>(res) = http::status::service_unavailable;
+					res = tl::make_unexpected( http::status::service_unavailable );
 				}else{
-					boost::beast::flat_buffer b;
+					boost::beast::flat_buffer 			b;
+					http::response<http::string_body> 	response;
+					boost::beast::error_code 			ec;
 
-					http::response<http::string_body> response;
-					http::read(sock, b, response, ec);
+					http::read( sock, b, response, ec );
 					if( ec ){
 						spdlog::error( "Error reading from {}. {}", address, ec.message() );
+						res = tl::make_unexpected( http::status::service_unavailable );
 					}else{
-						res = std::make_tuple( response.body(), response.result() );
+						res = response.body();
 					}
 				}
 				sock.shutdown(tcp::socket::shutdown_both, ec);

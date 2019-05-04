@@ -30,15 +30,16 @@ stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 	stdx::optional<std::string>			res;
 	consulcpp::internal::HttpClient		restClient;
 
-	auto jsonMaybe = restClient.get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
-	if( jsonMaybe ){
-		if( jsonMaybe.value().is_array() ){
-			auto 			jsonValue = jsonMaybe.value();
+	auto response = restClient.get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
+	if( response ){
+		auto jsonValue = nlohmann::json::parse( response.value() );
+
+		if( jsonValue.is_array() ){
 			std::string 	value;
 			try{
 				value = jsonValue[0].at( "Value" ).get<std::string>();
 			}catch( const std::exception & e ){
-				spdlog::error( "{}. Json was: {}", e.what(), jsonValue.dump() );
+				spdlog::error( "{}. Json was: {}", e.what(), response.value() );
 			}
 			if( !value.empty() ){
 				res = boost::beast::detail::base64_decode( value );
@@ -53,13 +54,13 @@ bool consulcpp::KV::set( const std::string & key, const std::string & value ) co
 	consulcpp::internal::HttpClient		restClient;
 	bool								res = false;
 
-	auto response = restClient.putAsString( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ), value );
+	auto response = restClient.put( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ), value );
 	if( response ){
 		if( response.value().find( "true" ) != std::string::npos ){
 			res = true;
 		}
 	}else{
-		spdlog::error( "KV set: Consul returns the error {}", response.error() );
+		spdlog::error( "KV set: Consul returns the error {}", response.error());
 	}
 	return res;
 }
@@ -69,7 +70,7 @@ bool consulcpp::KV::destroy( const std::string & key ) const
 	consulcpp::internal::HttpClient		restClient;
 	bool								res = false;
 
-	auto response = restClient.deleteAsString( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
+	auto response = restClient.delete_( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
 	if( response ){
 		if( response.value().find( "true" ) != std::string::npos ){
 			res = true;
