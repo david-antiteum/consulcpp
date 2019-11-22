@@ -57,8 +57,11 @@ int main( int argc, char * argv[] )
 		service.mId = fmt::format( "{}", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() );
 		service.mName = "leader-demo";
 		service.mAddress = consul.address();
-		service.mPort = 50051;
-
+		if( argc > 1 ){
+			service.mPort = atoi( argv[1] );
+		}else{
+			service.mPort = 50051;
+		}
 		check.mInterval = "5s";
 		check.mDeregisterCriticalServiceAfter = "1m";
 		check.mGRPC = fmt::format( "{}:{}/Health", service.mAddress, service.mPort );
