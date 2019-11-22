@@ -31,7 +31,8 @@ stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 	consulcpp::internal::HttpClient		restClient;
 
 	auto response = restClient.get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
-	if( response ){
+	if( response && !response.value().empty() ){
+		spdlog::info("GET VALUE {}", response.value());
 		auto jsonValue = nlohmann::json::parse( response.value() );
 
 		if( jsonValue.is_array() ){
