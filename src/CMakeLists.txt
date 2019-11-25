@@ -14,6 +14,9 @@ find_package( spdlog CONFIG REQUIRED )
 link_libraries( uriparser::uriparser )
 link_libraries( nlohmann_json::nlohmann_json )
 link_libraries( fmt::fmt )
+link_libraries( spdlog::spdlog_header_only )
+
+include_directories(${Boost_INCLUDE_DIRS})
 
 if( BUILD_SHARED_LIBS )
 	add_compile_definitions( ConsulCPP_DLL )
