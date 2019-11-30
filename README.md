@@ -55,6 +55,18 @@ The library uses [beast](https://www.boost.org/doc/libs/develop/libs/beast/doc/h
 
 Use cmake to build it on Windows, macOS and Linux.
 
+### Dependencies using VCPKG
+
+```
+./vcpkg install boost
+./vcpkg install fmt
+./vcpkg install uriparser
+./vcpkg install nlohmann-json
+./vcpkg install spdlog
+./vcpkg install protobuf
+./vcpkg install grpc
+```
+
 ## Use with CMake
 
 ```CMake

@@ -43,7 +43,10 @@ stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 				spdlog::error( "{}. Json was: {}", e.what(), response.value() );
 			}
 			if( !value.empty() ){
-				res = boost::beast::detail::base64_decode( value );
+				char * out = (char*)calloc( value.size(), sizeof(char) );
+				auto info = boost::beast::detail::base64::decode( out, value.c_str(), value.size() );
+				res = std::string( out, info.first );
+				free( out );
 			}
 		}
 	}
