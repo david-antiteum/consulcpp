@@ -100,7 +100,15 @@ target_link_libraries( ${PROJECT_NAME}
 	gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc_cronet
 )
 
-add_compile_definitions( _WIN32_WINNT=0x0A00 )
+find_program( CLANG_TIDY NAMES "clang-tidy" )
+if( CLANG_TIDY )
+	set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}" -checks=-*,readability-*)
+endif()
+
+if( WIN32 )
+	add_compile_definitions( _WIN32_WINNT=0x0A00 )
+endif()
+
 if( UNIX )
 	find_package( Threads REQUIRED )
 	target_link_libraries( ${PROJECT_NAME} 
