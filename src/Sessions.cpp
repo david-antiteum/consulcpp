@@ -25,10 +25,9 @@ consulcpp::Sessions::~Sessions()
 
 consulcpp::Session consulcpp::Sessions::create() const
 {
-	internal::HttpClient	restClient;
-	Session					res;
+	Session		res;
 
-	auto response = restClient.put( fmt::format( "{}/{}/session/create", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ) );
+	auto response = consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/session/create", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ) );
 	if( response ){
 		auto jsonValue = nlohmann::json::parse( response.value() );
 		res.mId = jsonValue["ID"];
@@ -38,10 +37,9 @@ consulcpp::Session consulcpp::Sessions::create() const
 
 bool consulcpp::Sessions::destroy( const consulcpp::Session & session ) const
 {
-	consulcpp::internal::HttpClient		restClient;
-	bool								res = false;
+	bool		res = false;
 
-	auto response = restClient.put( fmt::format( "{}/{}/session/destroy/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), session.mId ) );
+	auto response = consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/session/destroy/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), session.mId ) );
 	if( response ){
 		if( response.value().find( "true" ) != std::string::npos ){
 			res = true;

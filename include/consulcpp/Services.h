@@ -24,7 +24,7 @@ public:
 	void create( const Service & service );
 	/*! Deregisters a service.
 	*/
-	void destroy( const Service & id );
+	void destroy( const Service & service);
 
 	/*! Looks for a service in the local agent
 	*/

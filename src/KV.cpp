@@ -5,6 +5,7 @@
 #include "internal/HttpClient.h"
 
 #include <boost/beast/core/detail/base64.hpp>
+#include <gsl/gsl>
 
 struct consulcpp::KV::Private
 {
@@ -28,9 +29,8 @@ consulcpp::KV::~KV()
 stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 {
 	stdx::optional<std::string>			res;
-	consulcpp::internal::HttpClient		restClient;
 
-	auto response = restClient.get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
+	auto response = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
 	if( response && !response.value().empty() ){
 		spdlog::info("GET VALUE {}", response.value());
 		auto jsonValue = nlohmann::json::parse( response.value() );
@@ -43,10 +43,9 @@ stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 				spdlog::error( "{}. Json was: {}", e.what(), response.value() );
 			}
 			if( !value.empty() ){
-				char * out = (char*)calloc( value.size(), sizeof(char) );
+				gsl::owner<char*> out = new char[value.size()];
 				auto info = boost::beast::detail::base64::decode( out, value.c_str(), value.size() );
 				res = std::string( out, info.first );
-				free( out );
 			}
 		}
 	}
@@ -55,10 +54,9 @@ stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
 
 bool consulcpp::KV::set( const std::string & key, const std::string & value ) const
 {
-	consulcpp::internal::HttpClient		restClient;
-	bool								res = false;
+	bool		res = false;
 
-	auto response = restClient.put( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ), value );
+	auto response = consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ), value );
 	if( response ){
 		if( response.value().find( "true" ) != std::string::npos ){
 			res = true;
@@ -71,10 +69,9 @@ bool consulcpp::KV::set( const std::string & key, const std::string & value ) co
 
 bool consulcpp::KV::destroy( const std::string & key ) const
 {
-	consulcpp::internal::HttpClient		restClient;
-	bool								res = false;
+	bool		res = false;
 
-	auto response = restClient.delete_( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
+	auto response = consulcpp::internal::HttpClient::delete_( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
 	if( response ){
 		if( response.value().find( "true" ) != std::string::npos ){
 			res = true;

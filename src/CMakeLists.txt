@@ -46,11 +46,6 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 )
 add_compile_definitions( _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING )
 
-find_program( CLANG_TIDY NAMES "clang-tidy" )
-if( CLANG_TIDY )
-	set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}" -checks=-*,readability-*)
-endif()
-
 if( WIN32 )
 	add_compile_definitions( _WIN32_WINNT=0x0A00 )
 endif()

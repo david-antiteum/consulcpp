@@ -49,9 +49,7 @@ consulcpp::Consul::~Consul()
 
 bool consulcpp::Consul::connect()
 {
-	consulcpp::internal::HttpClient		restClient;
-
-	auto response = restClient.get( fmt::format( "{}/{}/agent/self", d->mAgentAddress, d->mAgentAPIVersion ) );
+	auto response = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/agent/self", d->mAgentAddress, d->mAgentAPIVersion ) );
 	if( response ){
 		auto jsonValue = nlohmann::json::parse( response.value() );
 		try{

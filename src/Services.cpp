@@ -26,24 +26,19 @@ consulcpp::Services::~Services()
 
 void consulcpp::Services::create( const Service & service )
 {
-	consulcpp::internal::HttpClient		restClient;
-
-	restClient.put( fmt::format( "{}/{}/agent/service/register", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ), service );
+	consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/agent/service/register", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ), service );
 }
 
 void consulcpp::Services::destroy( const Service & service )
 {
-	consulcpp::internal::HttpClient		restClient;
-
-	restClient.put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.id() ) );
+	consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.id() ) );
 }
 
 stdx::optional<consulcpp::Service> consulcpp::Services::findInLocal( const std::string & id ) const
 {
 	stdx::optional<consulcpp::Service>	res;
-	consulcpp::internal::HttpClient		restClient;
 
-	auto jsonMaybe = restClient.get( fmt::format( "{}/{}/agent/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), id ) );
+	auto jsonMaybe = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/agent/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), id ) );
 	if( jsonMaybe ){
 		nlohmann::json	json = jsonMaybe.value();
 		res = json.get<consulcpp::Service>();
@@ -54,7 +49,6 @@ stdx::optional<consulcpp::Service> consulcpp::Services::findInLocal( const std::
 std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( const std::string & name, const std::vector<std::string> & tags ) const
 {
 	std::vector<consulcpp::Service>		res;
-	consulcpp::internal::HttpClient		restClient;
 	std::string							path = fmt::format( "{}/{}/catalog/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), name );
 	std::string							query;
 
@@ -70,7 +64,7 @@ std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( const std::s
 	if( !query.empty() ){
 		path += "?" + query;
 	}
-	auto response = restClient.get( path );
+	auto response = consulcpp::internal::HttpClient::get( path );
 	if( response ){
 		auto jsonValue = nlohmann::json::parse( response.value() );
 		for( auto val: jsonValue ){

@@ -10,8 +10,13 @@
 
 #include "../common/helpers.h"
 
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER
+DISABLE_WARNING_DLL_INTERFACE
+DISABLE_WARNING_LOSS_OF_DATA
 #include <grpc++/grpc++.h>
 #include "health.grpc.pb.h"
+DISABLE_WARNING_POP
 
 class HealthServiceImpl final : public grpc::health::v1::Health::Service
 {
@@ -58,7 +63,7 @@ int main( int argc, char * argv[] )
 		service.mName = "leader-demo";
 		service.mAddress = consul.address();
 		if( argc > 1 ){
-			service.mPort = atoi( argv[1] );
+			service.mPort = std::stoi( argv[1] );
 		}else{
 			service.mPort = 50051;
 		}
