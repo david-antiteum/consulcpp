@@ -11,13 +11,13 @@
 
 struct consulcpp::Consul::Private
 {
-	std::string 	mAgentAddress;
-	std::string 	mAgentAPIVersion = "v1";
-	std::string		mAddress;
-	Services		mServices;
-	Sessions		mSessions;
-	Leader			mLeader;
-	KV				mKV;
+	std::string mAgentAddress;
+	std::string mAgentAPIVersion = "v1";
+	std::string mAddress;
+	Services	mServices;
+	Sessions	mSessions;
+	Leader		mLeader;
+	KV			mKV;
 
 	Private( Consul & consul, const std::string & agentAddress )
 		: mServices( consul )
@@ -25,22 +25,22 @@ struct consulcpp::Consul::Private
 		, mLeader( consul )
 		, mKV( consul )
 	{
-		if( agentAddress.empty() ){
+		if( agentAddress.empty() ) {
 			mAgentAddress = "http://127.0.0.1:8500";
-		}else{
+		} else {
 			mAgentAddress = agentAddress;
 		}
 	}
 };
 
-consulcpp::Consul::Consul() : d( std::make_unique<Private>( *this, std::string() ) )
+consulcpp::Consul::Consul()
+	: d( std::make_unique<Private>( *this, std::string() ) )
 {
-
 }
 
-consulcpp::Consul::Consul( const std::string & agentAddress ) : d( std::make_unique<Private>( *this, agentAddress ) )
+consulcpp::Consul::Consul( const std::string & agentAddress )
+	: d( std::make_unique<Private>( *this, agentAddress ) )
 {
-
 }
 
 consulcpp::Consul::~Consul()
@@ -50,12 +50,12 @@ consulcpp::Consul::~Consul()
 bool consulcpp::Consul::connect()
 {
 	auto response = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/agent/self", d->mAgentAddress, d->mAgentAPIVersion ) );
-	if( response ){
+	if( response ) {
 		auto jsonValue = nlohmann::json::parse( response.value() );
-		try{
+		try {
 			auto memberJson = jsonValue.at( "Member" );
-			d->mAddress = memberJson.at( "Addr" ).get<std::string>();
-		}catch( const std::exception & e ){
+			d->mAddress		= memberJson.at( "Addr" ).get<std::string>();
+		} catch( const std::exception & e ) {
 			spdlog::error( "{}. Json was: {}", e.what(), jsonValue.dump() );
 		}
 	}

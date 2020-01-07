@@ -7,7 +7,7 @@
 
 struct consulcpp::Services::Private
 {
-	consulcpp::Consul		& mConsul;
+	consulcpp::Consul & mConsul;
 
 	Private( Consul & consul )
 		: mConsul( consul )
@@ -15,9 +15,9 @@ struct consulcpp::Services::Private
 	}
 };
 
-consulcpp::Services::Services( Consul & consul ) : d( std::make_unique<Private>( consul ) )
+consulcpp::Services::Services( Consul & consul )
+	: d( std::make_unique<Private>( consul ) )
 {
-
 }
 
 consulcpp::Services::~Services()
@@ -36,38 +36,38 @@ void consulcpp::Services::destroy( const Service & service )
 
 stdx::optional<consulcpp::Service> consulcpp::Services::findInLocal( const std::string & id ) const
 {
-	stdx::optional<consulcpp::Service>	res;
+	stdx::optional<consulcpp::Service> res;
 
 	auto jsonMaybe = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/agent/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), id ) );
-	if( jsonMaybe ){
-		nlohmann::json	json = jsonMaybe.value();
-		res = json.get<consulcpp::Service>();
+	if( jsonMaybe ) {
+		nlohmann::json json = jsonMaybe.value();
+		res					= json.get<consulcpp::Service>();
 	}
 	return res;
 }
 
 std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( const std::string & name, const std::vector<std::string> & tags ) const
 {
-	std::vector<consulcpp::Service>		res;
-	std::string							path = fmt::format( "{}/{}/catalog/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), name );
-	std::string							query;
+	std::vector<consulcpp::Service> res;
+	std::string						path = fmt::format( "{}/{}/catalog/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), name );
+	std::string						query;
 
-	if( !tags.empty() ){
-		for( const std::string & tag: tags ){
-			if( query.empty() ){
+	if( !tags.empty() ) {
+		for( const std::string & tag: tags ) {
+			if( query.empty() ) {
 				query += fmt::format( "tag={}", tag );
-			}else{
+			} else {
 				query += fmt::format( "&tag={}", tag );
 			}
 		}
 	}
-	if( !query.empty() ){
+	if( !query.empty() ) {
 		path += "?" + query;
 	}
 	auto response = consulcpp::internal::HttpClient::get( path );
-	if( response ){
+	if( response ) {
 		auto jsonValue = nlohmann::json::parse( response.value() );
-		for( auto val: jsonValue ){
+		for( auto val: jsonValue ) {
 			res.push_back( val.get<consulcpp::Service>() );
 		}
 	}

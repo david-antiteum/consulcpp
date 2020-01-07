@@ -1,0 +1,32 @@
+---
+BasedOnStyle: WebKit
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterFunction: true
+  AfterStruct: true
+  AfterNamespace: false
+BreakConstructorInitializers: BeforeComma
+CompactNamespaces: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+PointerAlignment: Middle
+SortIncludes: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeParens: Never
+SpaceBeforeRangeBasedForLoopColon: false
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInParentheses: true
+SpacesInSquareBrackets: true
+Standard: Cpp11
+TabWidth: '4'
+UseTab: Always
+
+...

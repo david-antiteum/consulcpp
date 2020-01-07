@@ -9,7 +9,7 @@
 
 struct consulcpp::Leader::Private
 {
-	consulcpp::Consul		& mConsul;
+	consulcpp::Consul & mConsul;
 
 	Private( Consul & consul )
 		: mConsul( consul )
@@ -17,9 +17,9 @@ struct consulcpp::Leader::Private
 	}
 };
 
-consulcpp::Leader::Leader( Consul & consul ) : d( std::make_unique<Private>( consul ) )
+consulcpp::Leader::Leader( Consul & consul )
+	: d( std::make_unique<Private>( consul ) )
 {
-
 }
 
 consulcpp::Leader::~Leader()
@@ -28,17 +28,17 @@ consulcpp::Leader::~Leader()
 
 consulcpp::Leader::Status consulcpp::Leader::acquire( const Service & service, const Session & session ) const
 {
-	Leader::Status		res = Status::Error;
-	std::string			query = fmt::format( "{}/{}/kv/service/{}/leader?acquire={}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mName, session.mId );
+	Leader::Status res	 = Status::Error;
+	std::string	   query = fmt::format( "{}/{}/kv/service/{}/leader?acquire={}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mName, session.mId );
 
 	auto response = consulcpp::internal::HttpClient::put( query );
-	if( response ){
-		if( response.value().find( "true" ) != std::string::npos ){
+	if( response ) {
+		if( response.value().find( "true" ) != std::string::npos ) {
 			res = Status::Yes;
-		}else if( response.value().find( "false" ) != std::string::npos ){
+		} else if( response.value().find( "false" ) != std::string::npos ) {
 			res = Status::No;
 		}
-	}else{
+	} else {
 		spdlog::error( "Leader acquire: Consul returns the error {}", response.error() );
 	}
 	return res;
@@ -46,14 +46,14 @@ consulcpp::Leader::Status consulcpp::Leader::acquire( const Service & service, c
 
 void consulcpp::Leader::release( const Service & service, const Session & session ) const
 {
-	std::string			query = fmt::format( "{}/{}/kv/service/{}/leader?release={}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mName, session.mId );
+	std::string query = fmt::format( "{}/{}/kv/service/{}/leader?release={}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mName, session.mId );
 
 	auto response = consulcpp::internal::HttpClient::put( query );
-	if( response ){
-		if( response.value().find( "true" ) == std::string::npos ){
+	if( response ) {
+		if( response.value().find( "true" ) == std::string::npos ) {
 			spdlog::warn( "Leader release: release fails. Value was not acquire by this service?" );
 		}
-	}else{
+	} else {
 		spdlog::error( "Leader release: Consul returns the error {}", response.error() );
 	}
 }
