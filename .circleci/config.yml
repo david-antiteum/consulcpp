@@ -14,3 +14,13 @@ jobs:
       - run:
           name: Creating Binary Files
           command: 'cmake --build build'
+      - sonarcloud/scan
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.1
+
+workflows:
+  main:
+    jobs:
+      - build:
+          context: SonarCloud
