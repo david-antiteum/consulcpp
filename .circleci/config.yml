@@ -2,8 +2,8 @@ version: 2
 jobs:
   build:
     docker:
-	    - image: "kiwixz/arch-vcpkg"
-	  context: SonarCloud
+      - image: "kiwixz/arch-vcpkg"
+    context: SonarCloud
     steps:
       - checkout
       - run:
