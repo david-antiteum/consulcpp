@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: "https://hub.docker.com/r/kiwixz/arch-vcpkg"
+      - image: "kiwixz/arch-vcpkg"
     steps:
       - checkout
       - run:
