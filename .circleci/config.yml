@@ -7,10 +7,11 @@ jobs:
       - checkout
       - run:
           name: Installing Dependencies
-          command: 'vcpkg install boost fmt uriparser nlohmann-json spdlog protobuf grpc'
+          command: 'vcpkg install boost-beast fmt uriparser nlohmann-json spdlog protobuf grpc'
       - run:
           name: Creating Build Files
           command: 'cmake -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/install'
       - run:
           name: Creating Binary Files
           command: 'cmake --build build'
+      - sonarcloud/scan
