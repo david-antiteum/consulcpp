@@ -2,21 +2,15 @@ version: 2
 jobs:
   build:
     docker:
-      - image: "ubuntu:bionic"
+      - image: "https://hub.docker.com/r/kiwixz/arch-vcpkg"
     steps:
       - checkout
       - run:
-          name: Installing GCC
-          command: 'apt-get update && apt install -y build-essential cmake git curl unzip tar'
-      - run:
-          name: Installing VCPKG
-          command: 'git clone https://github.com/Microsoft/vcpkg.git && cd vcpkg && ./bootstrap-vcpkg.sh && cd ..'
-      - run:
           name: Installing Dependencies
-          command: './vcpkg/vcpkg install boost fmt uriparser nlohmann-json spdlog protobuf grpc'
+          command: 'vcpkg install boost fmt uriparser nlohmann-json spdlog protobuf grpc'
       - run:
           name: Creating Build Files
-          command: 'cmake -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/install'
+          command: 'cmake -H. -Bbuild -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=build/install'
       - run:
           name: Creating Binary Files
           command: 'cmake --build build'
