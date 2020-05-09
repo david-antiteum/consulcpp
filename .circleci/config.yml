@@ -2,7 +2,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: "kiwixz/arch-vcpkg"
+	    - image: "kiwixz/arch-vcpkg"
+	  context: SonarCloud
     steps:
       - checkout
       - run:
@@ -18,9 +19,3 @@ jobs:
 
 orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.1
-
-workflows:
-  main:
-    jobs:
-      - build:
-          context: SonarCloud
