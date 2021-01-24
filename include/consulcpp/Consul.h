@@ -22,28 +22,28 @@ public:
 	//! Creates a consul services object pointing to a local agent at http://127.0.0.1:8500
 	Consul();
 	//! Creates a consul services object pointing to a local agent at "agentAddress"
-	Consul( const std::string & agentAddress );	
+	explicit Consul( std::string_view agentAddress );	
 	~Consul();
 
 	/*! Connects to the local agent
 	*/
-	bool connect();
+	[[nodiscard]] bool connect();
 
 	//! Address where consul agent is running	
-	std::string address() const;
+	[[nodiscard]] std::string address() const;
 	//! Agent end point address, including the schema and port
-	std::string agentAddress() const;
+	[[nodiscard]] std::string agentAddress() const;
 	//! Consul API Version
-	std::string agentAPIVersion() const;
+	[[nodiscard]] std::string agentAPIVersion() const;
 
 	// Services access
-	Services & services() const;
+	[[nodiscard]] Services & services() const;
 	// Sessions access
-	Sessions & sessions() const;
+	[[nodiscard]] Sessions & sessions() const;
 	// Leader election access
-	Leader & leader() const;
+	[[nodiscard]] Leader & leader() const;
 	// KV Storer access
-	KV & kv() const;
+	[[nodiscard]] KV & kv() const;
 
 private:
 	struct Private;

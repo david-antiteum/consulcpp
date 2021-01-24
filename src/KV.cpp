@@ -11,9 +11,14 @@ struct consulcpp::KV::Private
 {
 	consulcpp::Consul & mConsul;
 
-	Private( Consul & consul )
+	explicit Private( Consul & consul )
 		: mConsul( consul )
 	{
+	}
+
+	std::string api( std::string_view key ) const
+	{
+		return fmt::format( "{}/{}/kv/{}", mConsul.agentAddress(), mConsul.agentAPIVersion(), key );
 	}
 };
 
@@ -22,42 +27,37 @@ consulcpp::KV::KV( Consul & consul )
 {
 }
 
-consulcpp::KV::~KV()
-{
-}
+consulcpp::KV::~KV() = default;
 
-stdx::optional<std::string> consulcpp::KV::get( const std::string & key ) const
+std::optional<std::string> consulcpp::KV::get( std::string_view key ) const
 {
-	stdx::optional<std::string> res;
+	std::optional<std::string> res;
 
-	auto response = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
-	if( response && !response.value().empty() ) {
+	if( auto response = internal::HttpClient::get( d->api( key ) ); response && !response.value().empty() ) {
 		spdlog::info( "GET VALUE {}", response.value() );
-		auto jsonValue = nlohmann::json::parse( response.value() );
 
-		if( jsonValue.is_array() ) {
-			std::string value;
-			try {
-				value = jsonValue[ 0 ].at( "Value" ).get<std::string>();
-			} catch( const std::exception & e ) {
-				spdlog::error( "{}. Json was: {}", e.what(), response.value() );
+		try {
+			if( auto jsonValue = nlohmann::json::parse( response.value() ); jsonValue.is_array() ) {
+				std::string value;
+					value = jsonValue[ 0 ].at( "Value" ).get<std::string>();
+				if( !value.empty() ) {
+					gsl::owner<char *> out	= new char[ value.size() ];
+					auto			   info = boost::beast::detail::base64::decode( out, value.c_str(), value.size() );
+					res						= std::string( out, info.first );
+				}
 			}
-			if( !value.empty() ) {
-				gsl::owner<char *> out	= new char[ value.size() ];
-				auto			   info = boost::beast::detail::base64::decode( out, value.c_str(), value.size() );
-				res						= std::string( out, info.first );
-			}
+		} catch( const std::exception & e ) {
+			spdlog::error( "consulcpp::KV::get error: {}. Response was: {}", e.what(), response.value() );
 		}
 	}
 	return res;
 }
 
-bool consulcpp::KV::set( const std::string & key, const std::string & value ) const
+bool consulcpp::KV::set( std::string_view key, std::string_view value ) const
 {
 	bool res = false;
 
-	auto response = consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ), value );
-	if( response ) {
+	if( auto response = internal::HttpClient::put( d->api( key ), value ); response ) {
 		if( response.value().find( "true" ) != std::string::npos ) {
 			res = true;
 		}
@@ -67,12 +67,11 @@ bool consulcpp::KV::set( const std::string & key, const std::string & value ) co
 	return res;
 }
 
-bool consulcpp::KV::destroy( const std::string & key ) const
+bool consulcpp::KV::destroy( std::string_view key ) const
 {
 	bool res = false;
 
-	auto response = consulcpp::internal::HttpClient::delete_( fmt::format( "{}/{}/kv/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), key ) );
-	if( response ) {
+	if( auto response = internal::HttpClient::delete_( d->api( key ) ); response ) {
 		if( response.value().find( "true" ) != std::string::npos ) {
 			res = true;
 		}

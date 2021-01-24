@@ -11,9 +11,14 @@ struct consulcpp::Leader::Private
 {
 	consulcpp::Consul & mConsul;
 
-	Private( Consul & consul )
+	explicit Private( Consul & consul )
 		: mConsul( consul )
 	{
+	}
+
+	std::string api() const
+	{
+		return fmt::format( "{}/{}/kv/service", mConsul.agentAddress(), mConsul.agentAPIVersion() );
 	}
 };
 
@@ -22,17 +27,14 @@ consulcpp::Leader::Leader( Consul & consul )
 {
 }
 
-consulcpp::Leader::~Leader()
-{
-}
+consulcpp::Leader::~Leader() = default;
 
 consulcpp::Leader::Status consulcpp::Leader::acquire( const Service & service, const Session & session ) const
 {
 	Leader::Status res	 = Status::Error;
-	std::string	   query = fmt::format( "{}/{}/kv/service/{}/leader?acquire={}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mName, session.mId );
+	std::string	   query = fmt::format( "{}/{}/leader?acquire={}", d->api(), service.mName, session.mId );
 
-	auto response = consulcpp::internal::HttpClient::put( query );
-	if( response ) {
+	if( auto response = consulcpp::internal::HttpClient::put( query ); response ) {
 		if( response.value().find( "true" ) != std::string::npos ) {
 			res = Status::Yes;
 		} else if( response.value().find( "false" ) != std::string::npos ) {
@@ -46,10 +48,9 @@ consulcpp::Leader::Status consulcpp::Leader::acquire( const Service & service, c
 
 void consulcpp::Leader::release( const Service & service, const Session & session ) const
 {
-	std::string query = fmt::format( "{}/{}/kv/service/{}/leader?release={}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.mName, session.mId );
+	std::string query = fmt::format( "{}/{}/leader?release={}", d->api(), service.mName, session.mId );
 
-	auto response = consulcpp::internal::HttpClient::put( query );
-	if( response ) {
+	if( auto response = consulcpp::internal::HttpClient::put( query ); response ) {
 		if( response.value().find( "true" ) == std::string::npos ) {
 			spdlog::warn( "Leader release: release fails. Value was not acquire by this service?" );
 		}

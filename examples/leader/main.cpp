@@ -7,6 +7,7 @@
 #include <csignal>
 #include <chrono>
 #include <thread>
+#include <optional>
 
 #include "../common/helpers.h"
 
@@ -28,9 +29,7 @@ class HealthServiceImpl final : public grpc::health::v1::Health::Service
 	}
 };
 
-static std::unique_ptr<grpc::Server> gServer;
-
-void RunServer( const consulcpp::Service & service )
+void TestService( consulcpp::Service & service )
 {
 	std::string			serverAddress = fmt::format( "{}:{}", service.mAddress, service.mPort );
 	HealthServiceImpl	healthService;
@@ -39,21 +38,30 @@ void RunServer( const consulcpp::Service & service )
 	builder.AddListeningPort( serverAddress, grpc::InsecureServerCredentials() );
 	builder.RegisterService( &healthService );
 
-	gServer = builder.BuildAndStart();
-	if( gServer ) {
-		spdlog::info( "Server listening on {}", serverAddress );
-		gServer->Wait();
+	if( std::unique_ptr<grpc::Server> server = builder.BuildAndStart(); server ){
+		std::thread grpcThread( &grpc::Server::Wait, server.get() );
+		spdlog::info( "Server listening on {}:{}", service.mAddress, service.mPort );
+		loop();
+		server->Shutdown();
+		grpcThread.join();
 		spdlog::info( "Server stopped" );
 	} else {
-		spdlog::critical( "Cannot start gRPC server on {}", serverAddress );
+		spdlog::critical( "Cannot start gRPC server on {}:{}", service.mAddress, service.mPort );
 	}
 }
-
 int main( int argc, char * argv[] )
 {
-	consulcpp::Consul consul;
+	unsigned short port = 50051;
 
-	if( consul.connect() ) {
+	if( argc > 1 ) {
+		if( auto maybePort = consulcpp::utils::asPort( argv[1] ); maybePort ){
+			port = maybePort.value();
+		}else{
+			spdlog::error( "This is not a valid port number {}", argv[1] );
+			return 1;
+		}
+	}
+	if( consulcpp::Consul consul; consul.connect() ) {
 		spdlog::info( "Agent address {}", consul.address() );
 
 		consulcpp::Service		service;
@@ -62,11 +70,9 @@ int main( int argc, char * argv[] )
 		service.mId		 = fmt::format( "{}", std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now().time_since_epoch() ).count() );
 		service.mName	 = "leader-demo";
 		service.mAddress = consul.address();
-		if( argc > 1 ) {
-			service.mPort = std::stoi( argv[ 1 ] );
-		} else {
-			service.mPort = 50051;
-		}
+		service.mPort    = port;
+	
+		check.mId							  = "presence";
 		check.mInterval						  = "5s";
 		check.mDeregisterCriticalServiceAfter = "1m";
 		check.mGRPC							  = fmt::format( "{}:{}/Health", service.mAddress, service.mPort );
@@ -74,8 +80,8 @@ int main( int argc, char * argv[] )
 
 		// Purge death services
 		std::vector<consulcpp::Service> otherServices = consul.services().findInCatalog( service.mName, service.mTags );
-		for( auto service: otherServices ) {
-			consul.services().destroy( service );
+		for( const auto & otherService: otherServices ) {
+			consul.services().destroy( otherService );
 		}
 
 		consul.services().create( service );
@@ -84,21 +90,15 @@ int main( int argc, char * argv[] )
 
 		consul.kv().set( "my-key", "my-value" );
 
-		consulcpp::Leader::Status leader = consul.leader().acquire( service, session );
-		if( leader == consulcpp::Leader::Status::Yes ) {
+		if( consulcpp::Leader::Status leader = consul.leader().acquire( service, session ); leader == consulcpp::Leader::Status::Yes ) {
 			spdlog::info( "I'm the leader" );
 		} else {
 			spdlog::info( "I'm a follower" );
 		}
-		std::thread grpcThread( RunServer, service );
-		loop();
-		if( gServer ) {
-			gServer->Shutdown();
-		}
-		grpcThread.join();
 
-		auto val = consul.kv().get( "my-key" );
-		if( val ) {
+		TestService( service );
+
+		if( auto val = consul.kv().get( "my-key" ); val ) {
 			spdlog::info( "Key value was {}", val.value() );
 			if( consul.kv().destroy( "my-key" ) ) {
 				spdlog::info( "Key deleted" );

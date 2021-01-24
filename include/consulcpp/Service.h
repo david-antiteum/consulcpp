@@ -32,7 +32,7 @@ struct ConsulCPP_API ServiceCheck
 
 	std::string		mHTTP;
 	std::string		mMethod;
-	std::map<std::string,std::vector<std::string>>	mHeaders;
+	std::map<std::string,std::vector<std::string>, std::less<>>	mHeaders;
 
 	std::string		mTCP;
 
@@ -59,7 +59,7 @@ extern ConsulCPP_API void from_json( const nlohmann::json & j, ServiceCheck & s 
 struct ConsulCPP_API Service
 {
 	// In Consul an empty id is valid and the name is used instead
-	const std::string & id() const
+	[[nodiscard]] const std::string & id() const
 	{
 		if( !mId.empty() ){
 			return mId;
@@ -71,18 +71,18 @@ struct ConsulCPP_API Service
 	std::string		mId;
 	std::string		mName;
 	std::string		mAddress;
-	int				mPort = 0;
+	unsigned short	mPort = 0;
 	std::string		mKind;
 	bool			mEnableTagOverride = false;
 
 	std::vector<std::string>			mTags;
-	std::map<std::string,std::string>	mMeta;
+	std::map<std::string,std::string, std::less<>>	mMeta;
 	
 	// Catalog data:
 	std::string							mDatacenter;
 	std::string							mNodeAddress;
 	std::string							mNode;
-	std::map<std::string,std::string>	mNodeMeta;
+	std::map<std::string,std::string, std::less<>>	mNodeMeta;
 	int									mCreateIndex = 0;
 	int									mModifyIndex = 0;
 

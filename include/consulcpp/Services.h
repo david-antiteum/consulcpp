@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "consulcpp/Export.h"
 
@@ -16,22 +17,22 @@ struct Service;
 class ConsulCPP_API Services
 {
 public:
-	Services( Consul & consul );
+	explicit Services( Consul & consul );
 	~Services();
 
 	/*! Registers a new service.
 	*/
-	void create( const Service & service );
+	void create( const Service & service ) const;
 	/*! Deregisters a service.
 	*/
-	void destroy( const Service & service);
+	void destroy( const Service & service) const;
 
 	/*! Looks for a service in the local agent
 	*/
-	stdx::optional<Service> findInLocal( const std::string & id ) const;
+	std::optional<Service> findInLocal( std::string_view id ) const;
 	/*! Looks for a service in the catalog
 	*/
-	std::vector<Service> findInCatalog( const std::string & name, const std::vector<std::string> & tags ) const;
+	std::vector<Service> findInCatalog( std::string_view name, const std::vector<std::string> & tags ) const;
 
 private:
 	struct Private;

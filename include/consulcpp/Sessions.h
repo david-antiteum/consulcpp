@@ -19,7 +19,7 @@ struct Session
 class ConsulCPP_API Sessions
 {
 public:
-	Sessions( Consul & consul );
+	explicit Sessions( Consul & consul );
 	~Sessions();
 
 	/*! Creates a new session

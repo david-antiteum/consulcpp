@@ -6,3 +6,4 @@
 #include <consulcpp/Sessions.h>
 #include <consulcpp/Leader.h>
 #include <consulcpp/KV.h>
+#include <consulcpp/Utils.h>

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <optional>
 
 #include "consulcpp/Export.h"
 
@@ -14,20 +15,20 @@ class Consul;
 class ConsulCPP_API KV
 {
 public:
-	KV( Consul & consul );
+	explicit KV( Consul & consul );
 	~KV();
 
 	/*! Returns the value of a single key
 	*/
-	stdx::optional<std::string> get( const std::string & key ) const;
+	std::optional<std::string> get( std::string_view key ) const;
 	/*! Sets the value of a key, creates it if required
 		Return true on success.
 	*/
-	bool set( const std::string & key, const std::string & value ) const;
+	bool set( std::string_view key, std::string_view value ) const;
 	/*! Deletes the key/value.
 		Returns true on success.
 	*/
-	bool destroy( const std::string & key ) const;
+	bool destroy( std::string_view key ) const;
 
 private:
 	struct Private;

@@ -8,9 +8,14 @@ struct consulcpp::Sessions::Private
 {
 	consulcpp::Consul & mConsul;
 
-	Private( Consul & consul )
+	explicit Private( Consul & consul )
 		: mConsul( consul )
 	{
+	}
+
+	std::string api() const
+	{
+		return fmt::format( "{}/{}/session", mConsul.agentAddress(), mConsul.agentAPIVersion() );
 	}
 };
 
@@ -19,18 +24,19 @@ consulcpp::Sessions::Sessions( Consul & consul )
 {
 }
 
-consulcpp::Sessions::~Sessions()
-{
-}
+consulcpp::Sessions::~Sessions() = default;
 
 consulcpp::Session consulcpp::Sessions::create() const
 {
 	Session res;
 
-	auto response = consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/session/create", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ) );
-	if( response ) {
-		auto jsonValue = nlohmann::json::parse( response.value() );
-		res.mId		   = jsonValue[ "ID" ];
+	if( auto response = internal::HttpClient::put( fmt::format( "{}/create", d->api() ) ); response ) {
+		try{
+			auto jsonValue = nlohmann::json::parse( response.value() );
+			res.mId		   = jsonValue[ "ID" ];
+		} catch( const std::exception & e ) {
+			spdlog::error( "consulcpp::Sessions::create error: {}. Response was: {}", e.what(), response.value() );
+		}
 	}
 	return res;
 }
@@ -39,11 +45,8 @@ bool consulcpp::Sessions::destroy( const consulcpp::Session & session ) const
 {
 	bool res = false;
 
-	auto response = consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/session/destroy/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), session.mId ) );
-	if( response ) {
-		if( response.value().find( "true" ) != std::string::npos ) {
-			res = true;
-		}
+	if( auto response = internal::HttpClient::put( fmt::format( "{}/destroy/{}", d->api(), session.mId ) ); response ) {
+		res = response.value().find( "true" ) != std::string::npos;
 	} else {
 		spdlog::error( "KV delete: Consul returns the error {}", response.error() );
 	}

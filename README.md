@@ -57,7 +57,7 @@ Use cmake to build it on Windows, macOS and Linux.
 
 ### Dependencies using VCPKG
 
-```
+```shell
 ./vcpkg install boost
 ./vcpkg install fmt
 ./vcpkg install uriparser
@@ -78,3 +78,15 @@ target_link_libraries(main PRIVATE consulcpp)
 
 - [oatpp-consul](https://github.com/oatpp/oatpp-consul): C++ Consul integration for oatpp applications
 - [Ppconsul](https://github.com/oliora/ppconsul): C++ client for Consul
+
+## Quality Checks
+
+### Sonarqube
+
+1. Install and add to the path both build-wrapper and sonar-scanner
+2. Set the SONAR_TOKEN environment variable
+3. Use the sonarqube target:
+
+```shell
+cmake --build build --target sonarqube
+```

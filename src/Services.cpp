@@ -9,9 +9,14 @@ struct consulcpp::Services::Private
 {
 	consulcpp::Consul & mConsul;
 
-	Private( Consul & consul )
+	explicit Private( Consul & consul )
 		: mConsul( consul )
 	{
+	}
+
+	std::string api() const
+	{
+		return fmt::format( "{}/{}/agent/service", mConsul.agentAddress(), mConsul.agentAPIVersion() );
 	}
 };
 
@@ -20,36 +25,47 @@ consulcpp::Services::Services( Consul & consul )
 {
 }
 
-consulcpp::Services::~Services()
+consulcpp::Services::~Services() = default;
+
+void consulcpp::Services::create( const Service & service ) const
 {
+	nlohmann::json serviceAsJson = service;
+	spdlog::info( "REGISTER {}", serviceAsJson.dump() );
+	if( auto response = internal::HttpClient::put( fmt::format( "{}/register", d->api() ), service ); response ){
+		spdlog::info( "consulcpp::Services::create response: {}", response.value() );
+	}else{
+		spdlog::error( "consulcpp::Services::create error: {}", response.error() );
+	}
 }
 
-void consulcpp::Services::create( const Service & service )
+void consulcpp::Services::destroy( const Service & service ) const
 {
-	consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/agent/service/register", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion() ), service );
+	if( auto response = internal::HttpClient::put( fmt::format( "{}/deregister/{}", d->api(), service.id() ) ); response ){
+		spdlog::info( "consulcpp::Services::destroy response: {}", response.value() );
+	}else{
+		spdlog::error( "consulcpp::Services::destroy error: {}", response.error() );
+	}
 }
 
-void consulcpp::Services::destroy( const Service & service )
+std::optional<consulcpp::Service> consulcpp::Services::findInLocal( std::string_view id ) const
 {
-	consulcpp::internal::HttpClient::put( fmt::format( "{}/{}/agent/service/deregister/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), service.id() ) );
-}
+	std::optional<consulcpp::Service> res;
 
-stdx::optional<consulcpp::Service> consulcpp::Services::findInLocal( const std::string & id ) const
-{
-	stdx::optional<consulcpp::Service> res;
-
-	auto jsonMaybe = consulcpp::internal::HttpClient::get( fmt::format( "{}/{}/agent/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), id ) );
-	if( jsonMaybe ) {
-		nlohmann::json json = jsonMaybe.value();
-		res					= json.get<consulcpp::Service>();
+	if( auto response = internal::HttpClient::get( fmt::format( "{}/{}", d->api(), id ) ); response ) {
+		try{
+			nlohmann::json json = response.value();
+			res					= json.get<consulcpp::Service>();
+		} catch( const std::exception & e ) {
+			spdlog::error( "consulcpp::Services::findInLocal error: {}. Response was: {}", e.what(), response.value() );
+		}
 	}
 	return res;
 }
 
-std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( const std::string & name, const std::vector<std::string> & tags ) const
+std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( std::string_view name, const std::vector<std::string> & tags ) const
 {
 	std::vector<consulcpp::Service> res;
-	std::string						path = fmt::format( "{}/{}/catalog/service/{}", d->mConsul.agentAddress(), d->mConsul.agentAPIVersion(), name );
+	std::string						path = fmt::format( "{}/{}", d->api(), name );
 	std::string						query;
 
 	if( !tags.empty() ) {
@@ -64,11 +80,14 @@ std::vector<consulcpp::Service> consulcpp::Services::findInCatalog( const std::s
 	if( !query.empty() ) {
 		path += "?" + query;
 	}
-	auto response = consulcpp::internal::HttpClient::get( path );
-	if( response ) {
-		auto jsonValue = nlohmann::json::parse( response.value() );
-		for( auto val: jsonValue ) {
-			res.push_back( val.get<consulcpp::Service>() );
+	if( auto response = consulcpp::internal::HttpClient::get( path ); response ) {
+		try{
+			auto jsonValue = nlohmann::json::parse( response.value() );
+			for( auto val: jsonValue ) {
+				res.push_back( val.get<consulcpp::Service>() );
+			}
+		} catch( const std::exception & e ) {
+			spdlog::error( "consulcpp::Services::findInCatalog error: {}. Response was: {}", e.what(), response.value() );
 		}
 	}
 	return res;

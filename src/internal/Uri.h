@@ -2,15 +2,19 @@
 
 #include <string>
 #include <uriparser/Uri.h>
+#include <spdlog/spdlog.h>
+#include <optional>
 
-namespace consulcpp { namespace internal {
+#include <consulcpp/Utils.h>
+
+namespace consulcpp::internal {
 
 // https://stackoverflow.com/questions/2616011/easy-way-to-parse-a-url-in-c-cross-platform
 
 class Uri //: boost::noncopyable
 {
 public:
-	Uri( const std::string & uri )
+	explicit Uri( std::string_view uri )
 		: uri_(uri)
 	{
 		UriParserStateA state_;
@@ -18,12 +22,24 @@ public:
 		isValid_   = uriParseUriA(&state_, uri_.c_str()) == URI_SUCCESS;
 	}
 
+	Uri() = delete;
+	Uri( Uri & other ) = delete;
+	Uri( Uri && other ) = delete;
+	const Uri & operator=( Uri && other ) = delete;
+
 	~Uri() { uriFreeUriMembersA(&uriParse_); }
 
-	bool isValid() const { return isValid_ && port() >= 0; }
+	[[nodiscard]] bool isValid() const
+	{
+		return isValid_ && consulcpp::utils::asPort( fromRange(uriParse_.portText) );
+	}
 
-	std::string scheme()   const { return fromRange(uriParse_.scheme); }
-	std::string host()     const
+	[[nodiscard]] std::string scheme() const
+	{
+		return fromRange(uriParse_.scheme);
+	}
+
+	[[nodiscard]] std::string host() const
 	{
 		std::string res = fromRange(uriParse_.hostText);
 		if( res == "localhost" ){
@@ -32,33 +48,29 @@ public:
 		return res;
 	}
 
-	int port() const
+	[[nodiscard]] unsigned short port() const
 	{
-		int	res = -1;
-
-		try{
-			res = std::stoi( fromRange(uriParse_.portText) ); 
-		}catch( ... ){
-
+		if( auto res = consulcpp::utils::asPort( fromRange(uriParse_.portText) ); res ){
+			return res.value();
 		}
-		return res;
+		return 0;
 	}
 
-	std::string path()     const { return fromList(uriParse_.pathHead, "/"); }
-	std::string query()    const { return fromRange(uriParse_.query); }
-	std::string fragment() const { return fromRange(uriParse_.fragment); }
+	[[nodiscard]] std::string path()     const { return fromList(uriParse_.pathHead, "/"); }
+	[[nodiscard]] std::string query()    const { return fromRange(uriParse_.query); }
+	[[nodiscard]] std::string fragment() const { return fromRange(uriParse_.fragment); }
 
 private:
 	std::string uri_;
 	UriUriA     uriParse_;
 	bool        isValid_;
 
-	std::string fromRange(const UriTextRangeA & rng) const
+	[[nodiscard]] std::string fromRange(const UriTextRangeA & rng) const
 	{
 		return std::string(rng.first, rng.afterLast);
 	}
 
-	std::string fromList(UriPathSegmentA * xs, const std::string & delim) const
+	[[nodiscard]] std::string fromList(UriPathSegmentA * xs, const std::string & delim) const
 	{
 		UriPathSegmentStructA * head(xs);
 		std::string accum;
@@ -73,4 +85,4 @@ private:
 	}
 };
 
-}}
+}

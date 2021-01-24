@@ -16,7 +16,7 @@ struct Session;
 class ConsulCPP_API Leader
 {
 public:
-	Leader( Consul & consul );
+	explicit Leader( Consul & consul );
 	~Leader();
 
 	/*! Leader status:

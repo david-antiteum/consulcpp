@@ -33,7 +33,7 @@ endif()
 target_link_libraries( ${PROJECT_NAME} 
 	consulcpp
 	protobuf::libprotobuf
-	gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc_cronet
+	gRPC::gpr gRPC::grpc gRPC::grpc++
 )
 
 if( UNIX )
@@ -51,6 +51,7 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 clang_format_setup( ${SOURCES} )
+sonarqube_setup()
 
 include(GNUInstallDirs)
 
