@@ -9,6 +9,8 @@ project( consulcpp VERSION 0.1.1 DESCRIPTION "A C++ library that implements the 
 
 option( BUILD_EXAMPLES "Build examples" ON )
 
+sonarqube_setup()
+
 add_subdirectory( src )
 if( BUILD_EXAMPLES )
 	add_subdirectory( examples/leader )

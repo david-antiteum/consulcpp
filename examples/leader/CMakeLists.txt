@@ -51,7 +51,6 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 clang_format_setup( ${SOURCES} )
-sonarqube_setup()
 
 include(GNUInstallDirs)
 
