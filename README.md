@@ -58,13 +58,7 @@ Use cmake to build it on Windows, macOS and Linux.
 ### Dependencies using VCPKG
 
 ```shell
-./vcpkg install boost
-./vcpkg install fmt
-./vcpkg install uriparser
-./vcpkg install nlohmann-json
-./vcpkg install spdlog
-./vcpkg install protobuf
-./vcpkg install grpc
+./vcpkg install boost fmt uriparser nlohmann-json spdlog protobuf grpc ms-gsl tl-expected catch2
 ```
 
 ## Use with CMake

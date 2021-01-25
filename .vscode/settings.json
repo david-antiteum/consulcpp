@@ -94,6 +94,17 @@
 		"fstream": "cpp",
 		"random": "cpp",
 		"pointers": "cpp",
-		"*.ipp": "cpp"
+		"*.ipp": "cpp",
+		"__bit_reference": "cpp",
+		"__split_buffer": "cpp",
+		"__hash_table": "cpp",
+		"__tree": "cpp",
+		"regex": "cpp",
+		"stack": "cpp",
+		"multi_span": "cpp",
+		"span": "cpp",
+		"string_span": "cpp",
+		"__string": "cpp",
+		"__node_handle": "cpp"
 	}
 }

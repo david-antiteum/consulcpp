@@ -18,7 +18,7 @@ struct consulcpp::Leader::Private
 
 	std::string api() const
 	{
-		return fmt::format( "{}/{}/kv/service", mConsul.agentAddress(), mConsul.agentAPIVersion() );
+		return fmt::format( "{}/{}/kv", mConsul.agentAddress(), mConsul.agentAPIVersion() );
 	}
 };
 

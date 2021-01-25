@@ -6,7 +6,7 @@
 
 namespace consulcpp::utils {
 
-	static [[nodiscard]] std::optional<unsigned short> asPort( const std::string & portText )
+	[[nodiscard]] static std::optional<unsigned short> asPort( const std::string & portText )
 	{
 		std::optional<unsigned short>	res;
 

@@ -29,10 +29,7 @@ public:
 
 	/*! Looks for a service in the local agent
 	*/
-	std::optional<Service> findInLocal( std::string_view id ) const;
-	/*! Looks for a service in the catalog
-	*/
-	std::vector<Service> findInCatalog( std::string_view name, const std::vector<std::string> & tags ) const;
+	std::optional<Service> find( std::string_view id ) const;
 
 private:
 	struct Private;

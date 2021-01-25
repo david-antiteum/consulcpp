@@ -79,7 +79,7 @@ int main( int argc, char * argv[] )
 		service.mChecks						  = { check };
 
 		// Purge death services
-		std::vector<consulcpp::Service> otherServices = consul.services().findInCatalog( service.mName, service.mTags );
+		std::vector<consulcpp::Service> otherServices = consul.catalog().find( service.mName, service.mTags );
 		for( const auto & otherService: otherServices ) {
 			consul.services().destroy( otherService );
 		}

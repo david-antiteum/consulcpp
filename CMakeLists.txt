@@ -7,6 +7,10 @@ include( Tools )
 
 project( consulcpp VERSION 0.1.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+	include( CTest )
+endif()
+
 option( BUILD_EXAMPLES "Build examples" ON )
 
 sonarqube_setup()
@@ -14,4 +18,7 @@ sonarqube_setup()
 add_subdirectory( src )
 if( BUILD_EXAMPLES )
 	add_subdirectory( examples/leader )
+endif()
+if( BUILD_TESTING )
+	add_subdirectory( tests )
 endif()

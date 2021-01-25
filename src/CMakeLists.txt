@@ -21,6 +21,7 @@ add_library( ${PROJECT_NAME} ${LIB_TYPE}
 	Consul.cpp
 	Services.cpp
 	Service.cpp
+	Catalog.cpp
 	Sessions.cpp
 	Leader.cpp
 	KV.cpp

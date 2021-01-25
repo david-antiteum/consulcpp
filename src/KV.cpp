@@ -34,7 +34,7 @@ std::optional<std::string> consulcpp::KV::get( std::string_view key ) const
 	std::optional<std::string> res;
 
 	if( auto response = internal::HttpClient::get( d->api( key ) ); response && !response.value().empty() ) {
-		spdlog::info( "GET VALUE {}", response.value() );
+		spdlog::debug( "GET VALUE {}", response.value() );
 
 		try {
 			if( auto jsonValue = nlohmann::json::parse( response.value() ); jsonValue.is_array() ) {

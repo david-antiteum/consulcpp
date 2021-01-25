@@ -8,6 +8,7 @@
 namespace consulcpp {
 
 class Services;
+class Catalog;
 class Sessions;
 class Leader;
 class KV;
@@ -38,6 +39,8 @@ public:
 
 	// Services access
 	[[nodiscard]] Services & services() const;
+	// Catalog access
+	[[nodiscard]] Catalog & catalog() const;
 	// Sessions access
 	[[nodiscard]] Sessions & sessions() const;
 	// Leader election access
