@@ -68,7 +68,7 @@ function(sonarqube_setup)
 			COMMAND
 				${BUILDWRAPPER_EXECUTABLE}
 				--out-dir bw-output
-				${CMAKE_MAKE_PROGRAM}
+				${CMAKE_MAKE_PROGRAM} coverage
 			COMMENT
 				"Run sonarqube build"
 			WORKING_DIRECTORY 

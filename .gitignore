@@ -37,3 +37,6 @@
 .vs
 .vscode/ipch
 build
+
+#
+.DS_Store

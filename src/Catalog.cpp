@@ -47,14 +47,12 @@ std::vector<consulcpp::Service> consulcpp::Catalog::find( std::string_view name,
 	}
 	if( auto response = consulcpp::internal::HttpClient::get( path ); response ) {
 		try{
-			auto jsonValue = nlohmann::json::parse( response.value() );
-
-			if( jsonValue.type() == nlohmann::json::value_t::array ){
-				for( auto val: jsonValue ) {
+			if( auto jv = nlohmann::json::parse( response.value() ); jv.type() == nlohmann::json::value_t::array ){
+				for( auto val: jv ) {
 					res.push_back( val.get<consulcpp::Service>() );
 				}
-			}else if( jsonValue.type() == nlohmann::json::value_t::object ){
-				res.push_back( jsonValue );
+			}else if( jv.type() == nlohmann::json::value_t::object ){
+				res.push_back( jv );
 			}else{
 				spdlog::error( "consulcpp::Catalog::find error: neither an object not an array. Response was: {}", response.value() );
 			}

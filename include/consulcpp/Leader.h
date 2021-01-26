@@ -37,6 +37,10 @@ public:
 	*/
 	void release( const Service & service, const Session & session ) const;
 
+	/*! Destroy KV data created to execute acquire
+	*/
+	void destroy( const Service & service ) const;
+
 private:
 	struct Private;
 	std::unique_ptr<Private>	d;

@@ -58,3 +58,12 @@ void consulcpp::Leader::release( const Service & service, const Session & sessio
 		spdlog::error( "Leader release: Consul returns the error {}", response.error() );
 	}
 }
+
+void consulcpp::Leader::destroy( const Service & service ) const
+{
+	std::string query = fmt::format( "{}/{}/leader", d->api(), service.mName );
+
+	if( auto response = consulcpp::internal::HttpClient::delete_( query ); !response ) {
+		spdlog::error( "Leader release: Consul returns the error {}", response.error() );
+	}
+}

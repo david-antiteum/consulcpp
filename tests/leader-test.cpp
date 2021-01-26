@@ -50,6 +50,9 @@ TEST_CASE( "Leader operations", "[consul][leader]" ) {
 
 		CHECK( leader2 == consulcpp::Leader::Status::Yes );
 
+		consul.leader().release( service2, session2 );
+		consul.leader().destroy( service2 );
+
 		consul.sessions().destroy( session2 );
 		consul.services().destroy( service2 );
 

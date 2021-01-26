@@ -7,8 +7,6 @@ static constexpr char gVal[] = "my-val";
 
 TEST_CASE( "KV operations", "[consul][kv]" ) {
 
-	unsigned short port = 9990;
-
 	consulcpp::Consul consul;
 
 	REQUIRE( consul.connect() );
