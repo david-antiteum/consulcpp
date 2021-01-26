@@ -13,11 +13,11 @@ protobuf_generate_cpp(ProtoSources ProtoHeaders ${ProtoFiles})
 PROTOBUF_GENERATE_GRPC_CPP(ProtoGRPCSources ProtoGRPCHeaders ${ProtoFiles})
 
 set( SOURCES 
-    main.cpp
+	main.cpp
 )
 add_executable( ${PROJECT_NAME}
 	${SOURCES}
-    ${ProtoSources}
+	${ProtoSources}
 	${ProtoGRPCSources}
 )
 

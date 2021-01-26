@@ -5,8 +5,10 @@ project( consulcpp-test )
 find_package(Catch2 REQUIRED)
 
 set( SOURCES 
-    main.cpp
+	main.cpp
+	services-test.cpp
 	kv-test.cpp
+	leader-test.cpp
 )
 add_executable( ${PROJECT_NAME}
 	${SOURCES}
