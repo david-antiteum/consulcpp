@@ -1,7 +1,5 @@
 cmake_minimum_required( VERSION 3.12...3.16 )
 
-project( consulcpp VERSION 0.1.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
-
 find_package( Boost REQUIRED )
 find_package( uriparser CONFIG REQUIRED )
 find_package( nlohmann_json CONFIG REQUIRED )

@@ -5,7 +5,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include( Common )
 include( Tools )
 
-project( consulcpp VERSION 0.1.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
+project( consulcpp VERSION 0.2.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	include( CTest )
