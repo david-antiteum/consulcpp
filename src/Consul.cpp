@@ -21,18 +21,13 @@ struct consulcpp::Consul::Private
 	Leader		mLeader;
 	KV			mKV;
 
-	explicit Private( Consul & consul, std::string_view agentAddress )
+	explicit Private( Consul & consul )
 		: mServices( consul )
 		, mCatalog( consul )
 		, mSessions( consul )
 		, mLeader( consul )
 		, mKV( consul )
 	{
-		if( agentAddress.empty() ) {
-			mAgentAddress = "http://127.0.0.1:8500";
-		} else {
-			mAgentAddress = agentAddress;
-		}
 	}
 
 	std::string api() const
@@ -42,26 +37,26 @@ struct consulcpp::Consul::Private
 };
 
 consulcpp::Consul::Consul()
-	: d( std::make_unique<Private>( *this, std::string() ) )
+	: d( spimpl::make_impl<Private>( *this ) )
 {
 }
 
-consulcpp::Consul::Consul( std::string_view agentAddress )
-	: d( std::make_unique<Private>( *this, agentAddress ) )
+bool consulcpp::Consul::connect( std::string_view agentAddress )
 {
-}
-
-consulcpp::Consul::~Consul() = default;
-
-bool consulcpp::Consul::connect()
-{
+	if( agentAddress.empty() ) {
+		d->mAgentAddress = "http://127.0.0.1:8500";
+	} else {
+		d->mAgentAddress = agentAddress;
+	}
 	if( auto response = consulcpp::internal::HttpClient::get( fmt::format( "{}/self", d->api() ) ); response ) {
 		try {
 			auto jsonValue  = nlohmann::json::parse( response.value() );
 			auto memberJson = jsonValue.at( "Member" );
 			d->mAddress		= memberJson.at( "Addr" ).get<std::string>();
+		} catch( const nlohmann::json::parse_error & e ) {
+			spdlog::error( "consulcpp::Consul::connect parser error: {}. Response was: {}", e.what(), response.value() );
 		} catch( const std::exception & e ) {
-			spdlog::error( "consulcpp::Consul::connect() error: {}. Response was: {}", e.what(), response.value() );
+			spdlog::error( "consulcpp::Consul::connect error: {}. Response was: {}", e.what(), response.value() );
 		}
 	}
 	return !d->mAddress.empty();
@@ -82,27 +77,27 @@ std::string consulcpp::Consul::agentAPIVersion() const
 	return d->mAgentAPIVersion;
 }
 
-consulcpp::Services & consulcpp::Consul::services() const
+const consulcpp::Services & consulcpp::Consul::services() const
 {
 	return d->mServices;
 }
 
-consulcpp::Catalog & consulcpp::Consul::catalog() const
+const consulcpp::Catalog & consulcpp::Consul::catalog() const
 {
 	return d->mCatalog;
 }
 
-consulcpp::Sessions & consulcpp::Consul::sessions() const
+const consulcpp::Sessions & consulcpp::Consul::sessions() const
 {
 	return d->mSessions;
 }
 
-consulcpp::Leader & consulcpp::Consul::leader() const
+const consulcpp::Leader & consulcpp::Consul::leader() const
 {
 	return d->mLeader;
 }
 
-consulcpp::KV & consulcpp::Consul::kv() const
+const consulcpp::KV & consulcpp::Consul::kv() const
 {
 	return d->mKV;
 }

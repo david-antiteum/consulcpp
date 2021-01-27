@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "consulcpp/Export.h"
+#include "consulcpp/spimpl.h"
 
 namespace consulcpp {
 
@@ -16,7 +17,6 @@ class ConsulCPP_API KV
 {
 public:
 	explicit KV( Consul & consul );
-	~KV();
 
 	/*! Returns the value of a single key
 	*/
@@ -32,7 +32,7 @@ public:
 
 private:
 	struct Private;
-	std::unique_ptr<Private>	d;
+	spimpl::impl_ptr<Private>	d;
 };
 
 }

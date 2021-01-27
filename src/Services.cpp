@@ -21,11 +21,9 @@ struct consulcpp::Services::Private
 };
 
 consulcpp::Services::Services( Consul & consul )
-	: d( std::make_unique<Private>( consul ) )
+	: d( spimpl::make_impl<Private>( consul ) )
 {
 }
-
-consulcpp::Services::~Services() = default;
 
 void consulcpp::Services::create( const Service & service ) const
 {
@@ -55,6 +53,8 @@ std::optional<consulcpp::Service> consulcpp::Services::find( std::string_view id
 		try{
 			nlohmann::json json = nlohmann::json::parse( response.value() );
 			res					= json.get<consulcpp::Service>();
+		} catch( const nlohmann::json::parse_error & e ) {
+			spdlog::error( "consulcpp::Services::find parser error: {}. Response was: {}", e.what(), response.value() );
 		} catch( const std::exception & e ) {
 			spdlog::error( "consulcpp::Services::find error: {}. Response was: {}", e.what(), response.value() );
 		}

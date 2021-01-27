@@ -73,58 +73,76 @@ public:
 private:
 	static tl::expected<std::string,http::status> execute( std::string_view address, std::string_view value, http::verb verb )
 	{
-		tl::expected<std::string,http::status>	res;
+		Uri uri( address );
 
-		if( Uri uri( address ); !uri.isValid() ){
+		if( !uri.isValid() ){
 			spdlog::error( "cannot parse uri {}", address );
-			res = tl::make_unexpected( http::status::bad_request );
-		}else{
-			boost::asio::io_service 		ios;
-			tcp::socket 					sock{ ios };
-			boost::beast::error_code 		ecConnect;
+			return tl::make_unexpected( http::status::bad_request );
+		}
+		// URI OK...
+		boost::asio::io_service 		ios;
+		tcp::socket 					sock{ ios };
+		boost::beast::error_code 		ecConnect;
 
-			tcp::endpoint endpoint( boost::asio::ip::address::from_string( uri.host() ), uri.port() );
-			sock.connect( endpoint, ecConnect );
-			if( ecConnect ){
-				spdlog::error( "Error conecting to {}. {}", address, ecConnect.message() );
+		tcp::endpoint endpoint( boost::asio::ip::address::from_string( uri.host() ), uri.port() );
+		sock.connect( endpoint, ecConnect );
+		if( ecConnect ){
+			spdlog::error( "Error conecting to {}. {}", address, ecConnect.message() );
+			return tl::make_unexpected( http::status::service_unavailable );
+		}else{
+			tl::expected<std::string,http::status>	res;
+
+			if( auto ecWrite = write( sock, uri, verb, value ); ecWrite ){
+				spdlog::error( "Error sending request to {}. {}", address, ecWrite.message() );
 				res = tl::make_unexpected( http::status::service_unavailable );
 			}else{
-				http::request<http::string_body> req;
-				req.method( verb );
-
-				if( auto query = uri.query(); query.empty() ){
-					req.target( uri.path() );
-				}else{
-					req.target( uri.path() + "?" + query );
-				}
-				req.set( http::field::host, uri.host() + ":" + std::to_string( uri.port() ) );
-				req.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
-				if( !value.empty() ){
-					req.body() = value;
-				}
-				req.prepare_payload();
-
-				boost::beast::error_code 	ecWrite;
-				http::write( sock, req, ecWrite );
-				if( ecWrite ){
-					spdlog::error( "Error sending request to {}. {}", address, ecWrite.message() );
-					res = tl::make_unexpected( http::status::service_unavailable );
-				}else{
-					boost::beast::flat_buffer 			b;
-					http::response<http::string_body> 	response;
-					boost::beast::error_code 			ecRead;
-
-					http::read( sock, b, response, ecRead );
-					if( ecRead ){
-						spdlog::error( "Error reading from {}. {}", address, ecRead.message() );
-						res = tl::make_unexpected( http::status::service_unavailable );
-					}else{
-						res = response.body();
-					}
-				}
-				boost::beast::error_code 		ecShutdown;
-				sock.shutdown(tcp::socket::shutdown_both, ecShutdown);
+				// Write OK...
+				res = read( sock, uri );
 			}
+			boost::beast::error_code 		ecShutdown;
+			sock.shutdown( tcp::socket::shutdown_both, ecShutdown );
+
+			return res;
+		}
+	}
+
+	static boost::beast::error_code write( tcp::socket & sock, const Uri & uri, http::verb verb, std::string_view value )
+	{
+		http::request<http::string_body> 	req;
+
+		req.method( verb );
+		if( auto query = uri.query(); query.empty() ){
+			req.target( uri.path() );
+		}else{
+			req.target( uri.path() + "?" + query );
+		}
+		req.set( http::field::host, uri.host() + ":" + std::to_string( uri.port() ) );
+		req.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
+		if( !value.empty() ){
+			req.body() = value;
+		}
+		req.prepare_payload();
+
+		boost::beast::error_code 			error;
+
+		http::write( sock, req, error );
+
+		return error;
+	}
+
+	static tl::expected<std::string,http::status> read( tcp::socket & sock, const Uri & uri )
+	{
+		tl::expected<std::string,http::status>	res;
+		boost::beast::flat_buffer 				b;
+		http::response<http::string_body> 		response;
+		boost::beast::error_code 				error;
+
+		http::read( sock, b, response, error );
+		if( error ){
+			spdlog::error( "Error reading from {}. {}", uri.asString(), error.message() );
+			res = tl::make_unexpected( http::status::service_unavailable );
+		}else{
+			res = response.body();
 		}
 		return res;
 	}

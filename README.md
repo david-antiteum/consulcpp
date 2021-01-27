@@ -18,13 +18,13 @@ int main( int argc, char * argv[] )
 {
     consulcpp::Consul   consul;
 
-    if( consul.connect() ){
+    if( consulcpp::Consul consul; consul.connect() ) {
         consulcpp::Service        service;
         consulcpp::ServiceCheck   check;
 
         service.mName = "demo";
         service.mAddress = consul.address();
-        service.mPort = 50051;
+        service.mPort = 9990;
 
         check.mInterval = "10s";
         check.mGRPC = fmt::format( "{}:{}/Health", service.mAddress, service.mPort );
@@ -34,8 +34,7 @@ int main( int argc, char * argv[] )
 
         consulcpp::Session     session = consul.sessions().create();
 
-        consulcpp::Leader::Status leader = consul.leader().acquire( service, session );
-        if( leader == consulcpp::Leader::Status::Yes ){
+        if( consulcpp::Leader::Status leader = consul.leader().acquire( service, session ); leader == consulcpp::Leader::Status::Yes ){
             // I'm the leader
         }else{
             // I'm a follower
@@ -70,8 +69,8 @@ target_link_libraries(main PRIVATE consulcpp)
 
 ## Other Consul Clients in C++
 
+- [Ppconsul](https://github.com/oliora/ppconsul): C++ client for Consul. You should probably use this instead :)
 - [oatpp-consul](https://github.com/oatpp/oatpp-consul): C++ Consul integration for oatpp applications
-- [Ppconsul](https://github.com/oliora/ppconsul): C++ client for Consul
 
 ## Quality Checks
 

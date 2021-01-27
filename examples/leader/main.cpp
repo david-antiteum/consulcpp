@@ -49,9 +49,10 @@ void TestService( consulcpp::Service & service )
 		spdlog::critical( "Cannot start gRPC server on {}:{}", service.mAddress, service.mPort );
 	}
 }
+
 int main( int argc, char * argv[] )
 {
-	unsigned short port = 50051;
+	unsigned short port = 9990;
 
 	if( argc > 1 ) {
 		if( auto maybePort = consulcpp::utils::asPort( argv[1] ); maybePort ){

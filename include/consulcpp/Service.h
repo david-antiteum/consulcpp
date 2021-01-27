@@ -58,6 +58,13 @@ extern ConsulCPP_API void from_json( const nlohmann::json & j, ServiceCheck & s 
 */
 struct ConsulCPP_API Service
 {
+	Service() = default;
+	Service( const Service & a ) = default;
+	Service( Service && a) noexcept = default;
+	~Service() = default;
+	Service & operator=( const Service & s ) = default;
+    Service & operator=( Service && a) noexcept = default;
+
 	// In Consul an empty id is valid and the name is used instead
 	[[nodiscard]] const std::string & id() const
 	{

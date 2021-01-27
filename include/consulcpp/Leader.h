@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "consulcpp/Export.h"
+#include "consulcpp/spimpl.h"
 
 namespace consulcpp {
 
@@ -17,7 +18,6 @@ class ConsulCPP_API Leader
 {
 public:
 	explicit Leader( Consul & consul );
-	~Leader();
 
 	/*! Leader status:
 		- Yes: you are the leader
@@ -43,7 +43,7 @@ public:
 
 private:
 	struct Private;
-	std::unique_ptr<Private>	d;
+	spimpl::impl_ptr<Private>	d;
 };
 
 }

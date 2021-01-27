@@ -21,11 +21,9 @@ struct consulcpp::Catalog::Private
 };
 
 consulcpp::Catalog::Catalog( Consul & consul )
-	: d( std::make_unique<Private>( consul ) )
+	: d( spimpl::make_impl<Private>( consul ) )
 {
 }
-
-consulcpp::Catalog::~Catalog() = default;
 
 std::vector<consulcpp::Service> consulcpp::Catalog::find( std::string_view name, const std::vector<std::string> & tags ) const
 {
@@ -56,6 +54,8 @@ std::vector<consulcpp::Service> consulcpp::Catalog::find( std::string_view name,
 			}else{
 				spdlog::error( "consulcpp::Catalog::find error: neither an object not an array. Response was: {}", response.value() );
 			}
+		} catch( const nlohmann::json::parse_error & e ) {
+			spdlog::error( "consulcpp::Catalog::find parser error: {}. Response was: {}", e.what(), response.value() );
 		} catch( const std::exception & e ) {
 			spdlog::error( "consulcpp::Catalog::find error: {}. Response was: {}", e.what(), response.value() );
 		}

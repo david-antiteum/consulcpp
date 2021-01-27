@@ -20,11 +20,9 @@ struct consulcpp::Sessions::Private
 };
 
 consulcpp::Sessions::Sessions( Consul & consul )
-	: d( std::make_unique<Private>( consul ) )
+	: d( spimpl::make_impl<Private>( consul ) )
 {
 }
-
-consulcpp::Sessions::~Sessions() = default;
 
 consulcpp::Session consulcpp::Sessions::create() const
 {
@@ -34,6 +32,8 @@ consulcpp::Session consulcpp::Sessions::create() const
 		try{
 			auto jsonValue = nlohmann::json::parse( response.value() );
 			res.mId		   = jsonValue[ "ID" ];
+		} catch( const nlohmann::json::parse_error & e ) {
+			spdlog::error( "consulcpp::Sessions::create parser error: {}. Response was: {}", e.what(), response.value() );
 		} catch( const std::exception & e ) {
 			spdlog::error( "consulcpp::Sessions::create error: {}. Response was: {}", e.what(), response.value() );
 		}

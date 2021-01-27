@@ -23,11 +23,9 @@ struct consulcpp::Leader::Private
 };
 
 consulcpp::Leader::Leader( Consul & consul )
-	: d( std::make_unique<Private>( consul ) )
+	: d( spimpl::make_impl<Private>( consul ) )
 {
 }
-
-consulcpp::Leader::~Leader() = default;
 
 consulcpp::Leader::Status consulcpp::Leader::acquire( const Service & service, const Session & session ) const
 {

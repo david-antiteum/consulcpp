@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "consulcpp/Export.h"
+#include "consulcpp/spimpl.h"
 
 namespace consulcpp {
 
@@ -20,15 +21,12 @@ class KV;
 class ConsulCPP_API Consul
 {
 public:
-	//! Creates a consul services object pointing to a local agent at http://127.0.0.1:8500
-	Consul();
-	//! Creates a consul services object pointing to a local agent at "agentAddress"
-	explicit Consul( std::string_view agentAddress );	
-	~Consul();
+	//! Creates a consul services object
+	Consul();	
 
-	/*! Connects to the local agent
+	/*! Connects to an agent
 	*/
-	[[nodiscard]] bool connect();
+	[[nodiscard]] bool connect( std::string_view agentAddress = "http://127.0.0.1:8500" );
 
 	//! Address where consul agent is running	
 	[[nodiscard]] std::string address() const;
@@ -38,19 +36,19 @@ public:
 	[[nodiscard]] std::string agentAPIVersion() const;
 
 	// Services access
-	[[nodiscard]] Services & services() const;
+	[[nodiscard]] const Services & services() const;
 	// Catalog access
-	[[nodiscard]] Catalog & catalog() const;
+	[[nodiscard]] const Catalog & catalog() const;
 	// Sessions access
-	[[nodiscard]] Sessions & sessions() const;
+	[[nodiscard]] const Sessions & sessions() const;
 	// Leader election access
-	[[nodiscard]] Leader & leader() const;
+	[[nodiscard]] const Leader & leader() const;
 	// KV Storer access
-	[[nodiscard]] KV & kv() const;
+	[[nodiscard]] const KV & kv() const;
 
 private:
 	struct Private;
-	std::unique_ptr<Private>	d;
+	spimpl::impl_ptr<Private>	d;
 };
 
 }

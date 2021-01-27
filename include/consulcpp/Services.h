@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "consulcpp/Export.h"
+#include "consulcpp/spimpl.h"
 
 namespace consulcpp {
 
@@ -18,7 +19,6 @@ class ConsulCPP_API Services
 {
 public:
 	explicit Services( Consul & consul );
-	~Services();
 
 	/*! Registers a new service.
 	*/
@@ -33,7 +33,7 @@ public:
 
 private:
 	struct Private;
-	std::unique_ptr<Private>	d;
+	spimpl::impl_ptr<Private>	d;
 };
 
 }

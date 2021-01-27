@@ -9,7 +9,7 @@ project( consulcpp VERSION 0.1.1 DESCRIPTION "A C++ library that implements the 
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	include( CTest )
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
 		include( CodeCoverage )
 		append_coverage_compiler_flags()
 		setup_target_for_coverage_gcovr( 

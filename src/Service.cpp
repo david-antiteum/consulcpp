@@ -90,7 +90,6 @@ void to_json( nlohmann::json & j, const Service & s )
 	}
 }
 
-// {"Address":"127.0.0.1","ContentHash":"1ddd2e08001df7ae","EnableTagOverride":false,"ID":"1556702600904","Meta":{},"Port":50051,"Service":"leader-demo","Tags":null,"Weights":{"Passing":1,"Warning":1}}
 void from_json( const nlohmann::json & j, Service & s )
 {
 	// Catalog ot Agent?

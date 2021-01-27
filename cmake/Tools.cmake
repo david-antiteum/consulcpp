@@ -58,6 +58,10 @@ function(sonarqube_setup)
 	else()
 		find_program( buildwrapper_tmp build-wrapper-linux-x86-64 )
 	endif()
+	if( UNIX )
+		set( BUILD_TARGET coverage )	
+	endif()
+
 	if( buildwrapper_tmp )
 		set( BUILDWRAPPER_EXECUTABLE ${buildwrapper_tmp})
 		unset( buildwrapper_tmp )
@@ -67,8 +71,8 @@ function(sonarqube_setup)
 				${CMAKE_MAKE_PROGRAM} clean
 			COMMAND
 				${BUILDWRAPPER_EXECUTABLE}
-				--out-dir bw-output
-				${CMAKE_MAKE_PROGRAM} coverage
+				--out-dir bw-output				
+				${CMAKE_MAKE_PROGRAM} ${BUILD_TARGET}
 			COMMENT
 				"Run sonarqube build"
 			WORKING_DIRECTORY 

@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "consulcpp/Export.h"
+#include "consulcpp/spimpl.h"
 
 namespace consulcpp {
 
@@ -20,7 +21,6 @@ class ConsulCPP_API Sessions
 {
 public:
 	explicit Sessions( Consul & consul );
-	~Sessions();
 
 	/*! Creates a new session
 	*/
@@ -32,7 +32,7 @@ public:
 
 private:
 	struct Private;
-	std::unique_ptr<Private>	d;
+	spimpl::impl_ptr<Private>	d;
 };
 
 }

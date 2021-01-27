@@ -60,6 +60,8 @@ public:
 	[[nodiscard]] std::string query()    const { return fromRange(uriParse_.query); }
 	[[nodiscard]] std::string fragment() const { return fromRange(uriParse_.fragment); }
 
+	[[nodiscard]] const std::string & asString() const { return uri_; };
+
 private:
 	std::string uri_;
 	UriUriA     uriParse_;

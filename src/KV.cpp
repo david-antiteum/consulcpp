@@ -23,11 +23,9 @@ struct consulcpp::KV::Private
 };
 
 consulcpp::KV::KV( Consul & consul )
-	: d( std::make_unique<Private>( consul ) )
+	: d( spimpl::make_impl<Private>( consul ) )
 {
 }
-
-consulcpp::KV::~KV() = default;
 
 std::optional<std::string> consulcpp::KV::get( std::string_view key ) const
 {
@@ -46,6 +44,8 @@ std::optional<std::string> consulcpp::KV::get( std::string_view key ) const
 					res						= std::string( out, info.first );
 				}
 			}
+		} catch( const nlohmann::json::parse_error & e ) {
+			spdlog::error( "consulcpp::KV::get parser error: {}. Response was: {}", e.what(), response.value() );
 		} catch( const std::exception & e ) {
 			spdlog::error( "consulcpp::KV::get error: {}. Response was: {}", e.what(), response.value() );
 		}
