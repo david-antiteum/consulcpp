@@ -6,6 +6,7 @@ find_package( nlohmann_json CONFIG REQUIRED )
 find_package( fmt CONFIG REQUIRED )
 find_package( spdlog CONFIG REQUIRED )
 find_package( Microsoft.GSL CONFIG REQUIRED )
+find_package( tl-expected CONFIG REQUIRED )
 
 if( BUILD_SHARED_LIBS )
 	add_compile_definitions( ConsulCPP_DLL )
@@ -31,6 +32,7 @@ target_link_libraries( ${PROJECT_NAME}
 	fmt::fmt
 	spdlog::spdlog_header_only
 	Microsoft.GSL::GSL
+	tl::expected
 )
 
 set_target_properties( ${PROJECT_NAME} 
