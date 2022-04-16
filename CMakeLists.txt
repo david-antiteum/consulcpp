@@ -5,11 +5,14 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include( Common )
 include( Tools )
 
-project( consulcpp VERSION 0.2.1 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
+project( consulcpp VERSION 0.2.2 DESCRIPTION "A C++ library that implements the Consul API" LANGUAGES CXX )
+
+option( BUILD_EXAMPLES "Build examples" ON )
+option( ADD_COVERAGE "Add coverage" OFF )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	include( CTest )
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
+	if( ADD_COVERAGE )
 		include( CodeCoverage )
 		append_coverage_compiler_flags()
 		setup_target_for_coverage_gcovr( 
@@ -18,8 +21,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 		)
 	endif()
 endif()
-
-option( BUILD_EXAMPLES "Build examples" ON )
 
 sonarqube_setup()
 
