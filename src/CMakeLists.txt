@@ -24,15 +24,18 @@ add_library( ${PROJECT_NAME} ${LIB_TYPE}
 	Sessions.cpp
 	Leader.cpp
 	KV.cpp
+	Utils.cpp
 )
 target_link_libraries( ${PROJECT_NAME} 
-	Boost::headers
-	uriparser::uriparser
-	nlohmann_json::nlohmann_json
-	fmt::fmt
-	spdlog::spdlog_header_only
-	Microsoft.GSL::GSL
-	tl::expected
+	PUBLIC
+		nlohmann_json::nlohmann_json
+	PRIVATE
+		Boost::headers
+		uriparser::uriparser
+		fmt::fmt
+		spdlog::spdlog_header_only
+		Microsoft.GSL::GSL
+		tl::expected
 )
 
 set_target_properties( ${PROJECT_NAME} 
