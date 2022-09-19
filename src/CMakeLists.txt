@@ -24,15 +24,18 @@ add_library( ${PROJECT_NAME} ${LIB_TYPE}
 	Sessions.cpp
 	Leader.cpp
 	KV.cpp
+	Utils.cpp
 )
 target_link_libraries( ${PROJECT_NAME} 
-	Boost::headers
-	uriparser::uriparser
-	nlohmann_json::nlohmann_json
-	fmt::fmt
-	spdlog::spdlog_header_only
-	Microsoft.GSL::GSL
-	tl::expected
+	PUBLIC
+		nlohmann_json::nlohmann_json
+	PRIVATE
+		Boost::headers
+		uriparser::uriparser
+		fmt::fmt
+		spdlog::spdlog_header_only
+		Microsoft.GSL::GSL
+		tl::expected
 )
 
 set_target_properties( ${PROJECT_NAME} 
@@ -47,14 +50,22 @@ include_directories( ../include )
 
 include(GNUInstallDirs)
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+install(TARGETS ${PROJECT_NAME} 
+	EXPORT ${PROJECT_NAME}Targets
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(EXPORT ${PROJECT_NAME}Config DESTINATION share/${PROJECT_NAME}/cmake)
+install(EXPORT ${PROJECT_NAME}Targets
+	FILE ${PROJECT_NAME}Targets.cmake
+	DESTINATION share/${PROJECT_NAME}/cmake
+)
+
+install( FILES "${PROJECT_NAME}Config.cmake"
+	DESTINATION share/${PROJECT_NAME}/cmake
+)
 
 export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)
 
