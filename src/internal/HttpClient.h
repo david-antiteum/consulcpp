@@ -29,7 +29,7 @@ namespace fmt {
 		constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
 		template <typename FormatContext>
-		auto format(const http::status & s, FormatContext &ctx) {
+		auto format(const http::status & s, FormatContext &ctx) const {
 			return format_to(ctx.out(), "{}", static_cast<int>( s ) );
 		}
 	};
