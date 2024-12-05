@@ -1,7 +1,14 @@
 cmake_minimum_required( VERSION 3.12...3.16 )
 
+if( USE_SYSTEM_LIBS )
+	find_package( PkgConfig REQUIRED )
+	pkg_search_module( liburiparser REQUIRED IMPORTED_TARGET GLOBAL liburiparser )
+	add_library( uriparser::uriparser ALIAS PkgConfig::liburiparser )
+else()
+	find_package( uriparser CONFIG REQUIRED )
+endif()
+
 find_package( Boost REQUIRED )
-find_package( uriparser CONFIG REQUIRED )
 find_package( nlohmann_json CONFIG REQUIRED )
 find_package( fmt CONFIG REQUIRED )
 find_package( spdlog CONFIG REQUIRED )
