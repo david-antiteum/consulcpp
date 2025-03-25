@@ -80,11 +80,11 @@ private:
 			return tl::make_unexpected( http::status::bad_request );
 		}
 		// URI OK...
-		boost::asio::io_service 		ios;
+		boost::asio::io_context 		ios;
 		tcp::socket 					sock{ ios };
 		boost::beast::error_code 		ecConnect;
 
-		tcp::endpoint endpoint( boost::asio::ip::address::from_string( uri.host() ), uri.port() );
+		tcp::endpoint endpoint( boost::asio::ip::make_address( uri.host() ), uri.port() );
 		sock.connect( endpoint, ecConnect );
 		if( ecConnect ){
 			spdlog::error( "Error conecting to {}. {}", address, ecConnect.message() );
